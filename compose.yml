@@ -1,0 +1,155 @@
+# =============================================================================
+# N8N AUTOMATION PLATFORM DOCKER COMPOSE CONFIGURATION
+# =============================================================================
+# This compose file sets up a complete N8N automation platform with PostgreSQL
+# database. N8N is a workflow automation tool that allows you to connect
+# different services and automate tasks.
+#
+# Prerequisites:
+# - Docker and Docker Compose installed
+# - .env file with required environment variables (see .env.sample)
+# - Domain name configured for N8N access
+# =============================================================================
+
+# =============================================================================
+# NETWORK CONFIGURATION
+# =============================================================================
+# Internal network for service communication
+networks:
+  support_network:
+    external: false  # Internal network for n8n and postgres communication
+
+# =============================================================================
+# VOLUME CONFIGURATION
+# =============================================================================
+# Persistent storage for application data
+volumes:
+  n8n_storage:      # N8N workflow data and configurations
+  n8n-postgres:     # PostgreSQL database data
+
+# =============================================================================
+# SERVICE DEFINITIONS
+# =============================================================================
+
+services:
+  # =============================================================================
+  # N8N AUTOMATION PLATFORM
+  # =============================================================================
+  # Main N8N service providing workflow automation capabilities
+  n8n:
+    image: docker.n8n.io/n8nio/n8n  # Official N8N Docker image
+    restart: unless-stopped          # Restart policy for reliability
+    container_name: n8n              # Container name for easy reference
+
+    # Resource limits and reservations for optimal performance
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0"      # Maximum CPU usage
+          memory: 1G       # Maximum memory usage
+        reservations:
+          cpus: "0.5"      # Guaranteed CPU allocation
+          memory: 512M     # Guaranteed memory allocation
+
+    # Network configuration
+    networks:
+      - support_network
+
+    # Service dependencies - wait for PostgreSQL to be healthy
+    depends_on:
+      n8n-postgres:
+        condition: service_healthy
+
+    # Legacy links (deprecated but kept for compatibility)
+    links:
+      - n8n-postgres
+
+    # Environment variables for N8N configuration
+    environment:
+      # Basic N8N configuration
+      - N8N_HOST=n8n.${DOMAIN_NAME}                    # Hostname for N8N access
+      - N8N_PORT=5678                                  # Internal port (mapped externally)
+      - N8N_PROTOCOL=http                              # Protocol (http/https)
+      - NODE_ENV=production                            # Node.js environment
+      - WEBHOOK_URL=https://n8n.${DOMAIN_NAME}/       # Webhook base URL
+
+      # Timezone configuration
+      - GENERIC_TIMEZONE=${TZ}                         # Generic timezone setting
+      - TZ=${TZ}                                       # System timezone
+
+      # Feature toggles
+      - N8N_RUNNERS_ENABLED=true                       # Enable workflow runners
+      - N8N_DIAGNOSTICS_ENABLED=false                 # Disable diagnostics
+      - N8N_TELEMETRY_ENABLED=false                   # Disable telemetry
+      - N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS=false   # Relax file permission checks
+
+      # Database configuration
+      - DB_TYPE=postgresdb                             # Database type
+      - DB_POSTGRESDB_DATABASE=${N8N_POSTGRES_DB}     # Database name
+      - DB_POSTGRESDB_HOST=n8n-postgres               # Database host
+      - DB_POSTGRESDB_PORT=5432                       # Database port
+      - DB_POSTGRESDB_USER=${N8N_POSTGRES_USER}       # Database user
+      - DB_POSTGRESDB_PASSWORD=${N8N_POSTGRES_PASSWORD} # Database password
+
+    # Port mapping - expose N8N to host
+    ports:
+      - ${N8N_PORT}:5678  # Map host port to container port
+
+    # Volume mounts for persistent data
+    volumes:
+      - n8n_storage:/home/node/.n8n  # N8N data directory
+
+    # Health check (currently disabled - uncomment to enable)
+    # healthcheck:
+    #   test: ["CMD", "curl", "-f", "http://localhost:5678/healthz"]
+    #   interval: 30s
+    #   timeout: 10s
+    #   retries: 3
+    #   start_period: 30s
+
+  # =============================================================================
+  # POSTGRESQL DATABASE
+  # =============================================================================
+  # PostgreSQL database for N8N data persistence
+  n8n-postgres:
+    image: postgres:17-bookworm  # PostgreSQL 17 with Debian Bookworm
+    restart: unless-stopped       # Restart policy for reliability
+    container_name: n8n-postgres  # Container name for easy reference
+    shm_size: 128mb               # Shared memory for PostgreSQL performance
+
+    # Volume mounts for persistent data and initialization
+    volumes:
+      - n8n-postgres:/var/lib/postgresql/data  # Persistent database storage
+      - ./conf/n8n-postgres/init-data.sh:/docker-entrypoint-initdb.d/init-data.sh  # Init script
+
+    # Database environment variables
+    environment:
+      - POSTGRES_PASSWORD=${N8N_POSTGRES_PASSWORD}  # Database password
+      - POSTGRES_USER=${N8N_POSTGRES_USER}         # Database user
+      - POSTGRES_DB=${N8N_POSTGRES_DB}             # Database name
+
+    # Network configuration
+    networks:
+      - support_network
+
+    # Resource limits and reservations
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0"      # Maximum CPU usage
+          memory: 1G       # Maximum memory usage
+        reservations:
+          cpus: "0.5"      # Guaranteed CPU allocation
+          memory: 512M     # Guaranteed memory allocation
+
+    # Health check to ensure database is ready
+    healthcheck:
+      interval: 30s        # Check every 30 seconds
+      retries: 5           # Retry up to 5 times
+      start_period: 20s    # Wait 20 seconds before first check
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -d ${N8N_POSTGRES_DB} -U ${N8N_POSTGRES_USER}",
+        ]
+      timeout: 5s          # 5 second timeout for health check
