@@ -1,0 +1,28 @@
+{
+  "name": "nia-engineering-portal",
+  "version": "1.0.0",
+  "description": "A lightning-fast, mission-critical engineering portal for broadcast/AV infrastructure access",
+  "main": "index.html",
+  "scripts": {
+    "start": "npx live-server --port=5500 --no-browser",
+    "convert": "node scripts/convert-bookmarks.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/your-org/nia_eng_page.git"
+  },
+  "keywords": [
+    "engineering",
+    "portal",
+    "broadcast",
+    "infrastructure"
+  ],
+  "author": "NIA Engineering Team",
+  "license": "MIT",
+  "devDependencies": {
+    "jsdom": "^21.1.1",
+    "live-server": "^1.2.2"
+  },
+  "dependencies": {}
+}
