@@ -1,0 +1,243 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Committees - NIA Engineering Portal</title>
+    <meta name="description" content="Committee room operations" />
+    <meta name="theme-color" content="#1a365d" />
+    <style>
+      :root {
+        --primary: #1a365d;
+        --secondary: #2d3748;
+        --accent: #3182ce;
+        --success: #38a169;
+        --warning: #d69e2e;
+        --danger: #e53e3e;
+        --light: #f7fafc;
+        --dark: #2d3748;
+        --text: #2d3748;
+        --text-light: #718096;
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family:
+          -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        background: var(--light);
+        color: var(--text);
+        line-height: 1.6;
+      }
+
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 1rem;
+      }
+
+      header {
+        background: var(--primary);
+        color: white;
+        padding: 1rem 0;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+
+      .header-content {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      h1 {
+        font-size: 1.5rem;
+        font-weight: 600;
+      }
+
+      .status {
+        padding: 0.25rem 0.75rem;
+        border-radius: 9999px;
+        font-size: 0.875rem;
+        font-weight: 500;
+      }
+
+      .status.online {
+        background: var(--success);
+        color: white;
+      }
+
+      .status.offline {
+        background: var(--danger);
+        color: white;
+      }
+
+      main {
+        padding: 2rem 0;
+      }
+
+      .breadcrumb {
+        background: white;
+        padding: 1rem;
+        border-radius: 8px;
+        margin-bottom: 1rem;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+      }
+
+      .breadcrumb a {
+        color: var(--accent);
+        text-decoration: none;
+      }
+
+      .breadcrumb a:hover {
+        text-decoration: underline;
+      }
+
+      .breadcrumb .separator {
+        margin: 0 0.5rem;
+        color: var(--text-light);
+      }
+
+      .room-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+      }
+
+      .room-card {
+        background: white;
+        border-radius: 8px;
+        padding: 1.5rem;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        transition: all 0.2s ease;
+        text-decoration: none;
+        color: inherit;
+        display: block;
+      }
+
+      .room-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      }
+
+      .room-card h2 {
+        color: var(--primary);
+        margin-bottom: 0.5rem;
+        font-size: 1.25rem;
+      }
+
+      .room-card p {
+        color: var(--text-light);
+        margin-bottom: 1rem;
+      }
+
+      .room-card .icon {
+        font-size: 2rem;
+        margin-bottom: 0.5rem;
+        display: block;
+      }
+
+      .room-card .vc-url {
+        background: var(--light);
+        padding: 0.5rem;
+        border-radius: 4px;
+        font-family: monospace;
+        font-size: 0.875rem;
+        color: var(--text);
+        margin-top: 1rem;
+      }
+
+      footer {
+        background: var(--secondary);
+        color: white;
+        padding: 1rem 0;
+        margin-top: 2rem;
+        text-align: center;
+        font-size: 0.875rem;
+      }
+
+      @media (max-width: 768px) {
+        .room-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div class="container">
+        <div class="header-content">
+          <h1>Committee Rooms</h1>
+          <div class="status online" id="status">Online</div>
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <div class="container">
+        <div class="breadcrumb">
+          <a href="index.html">Home</a>
+          <span class="separator">></span>
+          <span>Committees</span>
+        </div>
+
+        <div class="room-grid">
+          <a href="cr21.html" class="room-card">
+            <span class="icon">🏛️</span>
+            <h2>CR21</h2>
+            <p>Committee Room 21 operations</p>
+            <div class="vc-url">10.63.81.187</div>
+          </a>
+
+          <a href="cr29.html" class="room-card">
+            <span class="icon">🏛️</span>
+            <h2>CR29</h2>
+            <p>Committee Room 29 operations</p>
+            <div class="vc-url">10.63.81.197</div>
+          </a>
+
+          <a href="cr30.html" class="room-card">
+            <span class="icon">🏛️</span>
+            <h2>CR30</h2>
+            <p>Committee Room 30 operations</p>
+            <div class="vc-url">10.63.81.207</div>
+          </a>
+
+          <a href="senate.html" class="room-card">
+            <span class="icon">🏛️</span>
+            <h2>Senate</h2>
+            <p>Senate operations</p>
+            <div class="vc-url">10.63.81.217</div>
+          </a>
+        </div>
+      </div>
+    </main>
+
+    <footer>
+      <div class="container">
+        <p>NIA Engineering Portal - Committee Rooms</p>
+      </div>
+    </footer>
+
+    <script>
+      function updateStatus() {
+        const status = document.getElementById("status");
+        if (navigator.onLine) {
+          status.textContent = "Online";
+          status.className = "status online";
+        } else {
+          status.textContent = "Offline";
+          status.className = "status offline";
+        }
+      }
+
+      window.addEventListener("online", updateStatus);
+      window.addEventListener("offline", updateStatus);
+      updateStatus();
+    </script>
+  </body>
+</html>

@@ -318,3 +318,5 @@ __marimo__/
 # Custom development modes and optimization documentation
 custom_modes/
 optimization-journey/
+
+package-lock.json

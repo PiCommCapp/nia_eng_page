@@ -1,0 +1,392 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CR21 - NIA Engineering Portal</title>
+    <meta name="description" content="Committee Room 21 operations" />
+    <meta name="theme-color" content="#1a365d" />
+    <style>
+      :root {
+        --primary: #1a365d;
+        --secondary: #2d3748;
+        --accent: #3182ce;
+        --success: #38a169;
+        --warning: #d69e2e;
+        --danger: #e53e3e;
+        --light: #f7fafc;
+        --dark: #2d3748;
+        --text: #2d3748;
+        --text-light: #718096;
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family:
+          -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        background: var(--light);
+        color: var(--text);
+        line-height: 1.6;
+      }
+
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 1rem;
+      }
+
+      header {
+        background: var(--primary);
+        color: white;
+        padding: 1rem 0;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+
+      .header-content {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      h1 {
+        font-size: 1.5rem;
+        font-weight: 600;
+      }
+
+      .status {
+        padding: 0.25rem 0.75rem;
+        border-radius: 9999px;
+        font-size: 0.875rem;
+        font-weight: 500;
+      }
+
+      .status.online {
+        background: var(--success);
+        color: white;
+      }
+
+      .status.offline {
+        background: var(--danger);
+        color: white;
+      }
+
+      main {
+        padding: 2rem 0;
+      }
+
+      .breadcrumb {
+        background: white;
+        padding: 1rem;
+        border-radius: 8px;
+        margin-bottom: 1rem;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+      }
+
+      .breadcrumb a {
+        color: var(--accent);
+        text-decoration: none;
+      }
+
+      .breadcrumb a:hover {
+        text-decoration: underline;
+      }
+
+      .breadcrumb .separator {
+        margin: 0 0.5rem;
+        color: var(--text-light);
+      }
+
+      .role-selection {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1rem;
+        margin-bottom: 2rem;
+      }
+
+      .role-card {
+        background: white;
+        border-radius: 8px;
+        padding: 1.5rem;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        transition: all 0.2s ease;
+        text-decoration: none;
+        color: inherit;
+        display: block;
+        text-align: center;
+      }
+
+      .role-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      }
+
+      .role-card.operator {
+        border-left: 4px solid var(--accent);
+      }
+
+      .role-card.engineer {
+        border-left: 4px solid var(--warning);
+      }
+
+      .role-card h2 {
+        color: var(--primary);
+        margin-bottom: 0.5rem;
+        font-size: 1.25rem;
+      }
+
+      .role-card .icon {
+        font-size: 2rem;
+        margin-bottom: 0.5rem;
+        display: block;
+      }
+
+      .links-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 1rem;
+      }
+
+      .link-card {
+        background: white;
+        border-radius: 8px;
+        padding: 1rem;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        transition: all 0.2s ease;
+        text-decoration: none;
+        color: inherit;
+        display: block;
+      }
+
+      .link-card:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+      }
+
+      .link-card h3 {
+        color: var(--primary);
+        margin-bottom: 0.25rem;
+        font-size: 1rem;
+      }
+
+      .link-card .url {
+        color: var(--text-light);
+        font-size: 0.875rem;
+        font-family: monospace;
+      }
+
+      .section {
+        margin-bottom: 2rem;
+      }
+
+      .section h2 {
+        color: var(--primary);
+        margin-bottom: 1rem;
+        font-size: 1.25rem;
+      }
+
+      .camera-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+      }
+
+      .camera-card {
+        background: white;
+        border-radius: 8px;
+        padding: 1rem;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        transition: all 0.2s ease;
+        text-decoration: none;
+        color: inherit;
+        display: block;
+        text-align: center;
+      }
+
+      .camera-card:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+      }
+
+      .camera-card h3 {
+        color: var(--primary);
+        margin-bottom: 0.25rem;
+        font-size: 1rem;
+      }
+
+      .camera-card .url {
+        color: var(--text-light);
+        font-size: 0.875rem;
+        font-family: monospace;
+      }
+
+      footer {
+        background: var(--secondary);
+        color: white;
+        padding: 1rem 0;
+        margin-top: 2rem;
+        text-align: center;
+        font-size: 0.875rem;
+      }
+
+      @media (max-width: 768px) {
+        .role-selection {
+          grid-template-columns: 1fr;
+        }
+
+        .links-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .camera-grid {
+          grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div class="container">
+        <div class="header-content">
+          <h1>CR21 - Committee Room 21</h1>
+          <div class="status online" id="status">Online</div>
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <div class="container">
+        <div class="breadcrumb">
+          <a href="index.html">Home</a>
+          <span class="separator">></span>
+          <a href="committees.html">Committees</a>
+          <span class="separator">></span>
+          <span>CR21</span>
+        </div>
+
+        <div class="role-selection">
+          <a href="#operator" class="role-card operator">
+            <span class="icon">🎥</span>
+            <h2>Operator</h2>
+            <p>Camera control and streaming</p>
+          </a>
+
+          <a href="#engineer" class="role-card engineer">
+            <span class="icon">🔧</span>
+            <h2>Engineer</h2>
+            <p>Technical systems and monitoring</p>
+          </a>
+        </div>
+
+        <div class="section">
+          <h2>General Links</h2>
+          <div class="links-grid">
+            <a href="http://10.63.81.187" class="link-card" target="_blank">
+              <h3>CR21 VC Page</h3>
+              <div class="url">10.63.81.187</div>
+            </a>
+
+            <a
+              href="https://airtable.com/appUpFddJe6ZJsbIl/shr6mD3kEddx52VzF"
+              class="link-card"
+              target="_blank"
+            >
+              <h3>Pre-TX Checks</h3>
+              <div class="url">airtable.com</div>
+            </a>
+
+            <a
+              href="https://airtable.com/appeQFJ0PxoKwDvR2/shrrVIiTHcVyXXBqq"
+              class="link-card"
+              target="_blank"
+            >
+              <h3>Fault Log</h3>
+              <div class="url">airtable.com</div>
+            </a>
+
+            <a href="https://www.picomms.tv" class="link-card" target="_blank">
+              <h3>PiComms Home</h3>
+              <div class="url">picomms.tv</div>
+            </a>
+
+            <a href="https://www.niassembly.gov.uk" class="link-card" target="_blank">
+              <h3>NIA Home</h3>
+              <div class="url">niassembly.gov.uk</div>
+            </a>
+
+            <a
+              href="https://aims.niassembly.gov.uk/assemblybusiness/businessdiary.aspx"
+              class="link-card"
+              target="_blank"
+            >
+              <h3>Business Diary</h3>
+              <div class="url">aims.niassembly.gov.uk</div>
+            </a>
+          </div>
+        </div>
+
+        <div class="section">
+          <h2>Cameras</h2>
+          <div class="camera-grid">
+            <a href="http://10.63.82.104" class="camera-card" target="_blank">
+              <h3>Camera 1</h3>
+              <div class="url">10.63.82.104</div>
+            </a>
+
+            <a href="http://10.63.82.105" class="camera-card" target="_blank">
+              <h3>Camera 2</h3>
+              <div class="url">10.63.82.105</div>
+            </a>
+
+            <a href="http://10.63.82.106" class="camera-card" target="_blank">
+              <h3>Camera 3</h3>
+              <div class="url">10.63.82.106</div>
+            </a>
+
+            <a href="http://10.63.82.107" class="camera-card" target="_blank">
+              <h3>Camera 4</h3>
+              <div class="url">10.63.82.107</div>
+            </a>
+
+            <a href="http://10.63.82.108" class="camera-card" target="_blank">
+              <h3>Camera 5</h3>
+              <div class="url">10.63.82.108</div>
+            </a>
+
+            <a href="http://10.63.82.109" class="camera-card" target="_blank">
+              <h3>Camera 6</h3>
+              <div class="url">10.63.82.109</div>
+            </a>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <footer>
+      <div class="container">
+        <p>NIA Engineering Portal - CR21 Operations</p>
+      </div>
+    </footer>
+
+    <script>
+      function updateStatus() {
+        const status = document.getElementById("status");
+        if (navigator.onLine) {
+          status.textContent = "Online";
+          status.className = "status online";
+        } else {
+          status.textContent = "Offline";
+          status.className = "status offline";
+        }
+      }
+
+      window.addEventListener("online", updateStatus);
+      window.addEventListener("offline", updateStatus);
+      updateStatus();
+    </script>
+  </body>
+</html>

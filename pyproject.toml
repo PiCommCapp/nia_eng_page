@@ -1,0 +1,14 @@
+[project]
+name = "nia-eng-page"
+version = "0.1.0"
+description = "Simple Local Web Pages"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "black>=25.9.0",
+    "mkdocs>=1.6.1",
+    "pyinstaller>=6.16.0",
+    "pystray>=0.19.5",
+    "pytest>=8.4.2",
+    "ruff>=0.13.2",
+]
