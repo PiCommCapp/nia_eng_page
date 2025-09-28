@@ -1,0 +1,34 @@
+{
+  "recommendations": [
+    // HTML/CSS/JavaScript core extensions
+    "ritwickdey.liveserver", // Live Server for local development
+    "esbenp.prettier-vscode", // Prettier code formatting
+    "dbaeumer.vscode-eslint", // ESLint for JavaScript linting
+
+    // HTML enhancements
+    "formulahendry.auto-close-tag", // Automatically close HTML tags
+    "formulahendry.auto-rename-tag", // Automatically rename paired HTML tags
+
+    // CSS enhancements
+    "ecmel.vscode-html-css", // CSS class intellisense for HTML
+    "anysphere.cursorpyright",
+    "charliermarsh.ruff",
+    "mikestead.dotenv",
+
+    // Markdown support
+    "yzhang.markdown-all-in-one", // Markdown tools and preview
+    "davidanson.vscode-markdownlint", // Markdown linting
+
+    // Productivity tools
+    "streetsidesoftware.code-spell-checker", // Spell checking
+    "editorconfig.editorconfig", // EditorConfig support
+
+    "mutantdino.resourcemonitor", // Resource monitor
+    "bierner.markdown-mermaid", // Mermaid support for Markdown
+
+    // Code navigation
+    "visualstudioexptteam.vscodeintellicode", // AI-assisted intellisense
+    "christian-kohler.path-intellisense" // Path autocompletion
+  ],
+  "unwantedRecommendations": []
+}

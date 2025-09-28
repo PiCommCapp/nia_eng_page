@@ -3,7 +3,7 @@
 # Default port for the development server
 PORT ?= 9001
 
-.PHONY: help serve serve-port install update clean status kill
+.PHONY: help serve serve-port install update clean status kill tray build-tray test-tray
 
 # Default target
 help:
@@ -16,6 +16,11 @@ help:
 	@echo "  make update     - Update dependencies using UV"
 	@echo "  make status     - Check project status and dependencies"
 	@echo "  make clean      - Clean up temporary files"
+	@echo ""
+	@echo "Tray Application Commands:"
+	@echo "  make tray       - Run the tray application (requires display)"
+	@echo "  make test-tray  - Test tray application components"
+	@echo "  make build-tray - Build executable for current platform"
 	@echo ""
 
 # Start the development server
@@ -97,7 +102,38 @@ clean:
 	@find . -type f -name "*.pyc" -delete 2>/dev/null || true
 	@find . -type d -name "__pycache__" -delete 2>/dev/null || true
 	@echo "  • Removing system files..."
-	@find . -type f -name ".DS_Store" -delete 2>/dev/null || true
-	@echo "  • Cleaning UV cache..."
-	@rm -rf ./.uv/cache 2>/dev/null || true
-	@echo "✅ Cleanup complete!"
+	@echo "  • Removing build artifacts..."
+	@rm -rf build/ dist/ *.spec
+	@echo "✅ Cleanup complete"
+	@echo ""
+
+# Tray Application Commands
+
+# Run the tray application (requires display)
+tray:
+	@echo "🖥️  Starting NIA Engineering Portal Tray Application..."
+	@echo "⚠️  Note: This requires a display (X11/Wayland on Linux)"
+	@echo ""
+	uv run python tray_app/main.py
+
+# Test tray application components
+test-tray:
+	@echo "🧪 Testing tray application components..."
+	@echo "  • Testing configuration manager..."
+	@uv run python -c "from tray_app.config_manager import ConfigManager; cm = ConfigManager(); print('✓ Config manager working')"
+	@echo "  • Testing server controller..."
+	@uv run python -c "from tray_app.server_controller import ServerController; from tray_app.config_manager import ConfigManager; cm = ConfigManager(); sc = ServerController(cm); print('✓ Server controller working')"
+	@echo "  • Testing GUI components..."
+	@uv run python -c "from tray_app.gui_components import ConfigurationDialog; from tray_app.config_manager import ConfigManager; cm = ConfigManager(); print('✓ GUI components working')"
+	@echo "✅ All tray application components working"
+	@echo ""
+
+# Build executable for current platform
+build-tray:
+	@echo "🔨 Building tray application executable..."
+	@echo "  • Platform: $$(uname -s)"
+	@echo "  • Using PyInstaller with UV..."
+	@uv run python scripts/build_tray.py
+	@echo "✅ Build complete"
+	@echo "  • Executable location: dist/$$(uname -s | tr '[:upper:]' '[:lower:]')/"
+	@echo ""

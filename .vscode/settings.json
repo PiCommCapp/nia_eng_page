@@ -1,0 +1,53 @@
+{
+  // Editor settings
+  "editor.formatOnSave": true,
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "editor.tabSize": 2,
+  "editor.insertSpaces": true,
+  "editor.rulers": [100],
+  "editor.wordWrap": "on",
+  "editor.bracketPairColorization.enabled": true,
+
+  // File settings
+  "files.trimTrailingWhitespace": true,
+  "files.insertFinalNewline": true,
+  "files.eol": "\n",
+
+  // HTML settings
+  "html.format.wrapLineLength": 100,
+  "html.format.indentInnerHtml": true,
+  "html.format.preserveNewLines": true,
+
+  // CSS settings
+  "css.validate": true,
+
+  // JavaScript settings
+  "javascript.format.insertSpaceAfterFunctionKeywordForAnonymousFunctions": true,
+  "javascript.format.insertSpaceBeforeFunctionParenthesis": false,
+  "javascript.updateImportsOnFileMove.enabled": "always",
+
+  // Live Server settings
+  "liveServer.settings.donotShowInfoMsg": true,
+  "liveServer.settings.donotVerifyTags": true,
+  "liveServer.settings.port": 5500,
+
+  // Spell checking for documentation
+  "cSpell.words": ["bookmarks", "categorization", "FQDN", "intuitive"],
+
+  // Exclude patterns
+  "files.exclude": {
+    "**/.git": true,
+    "**/.DS_Store": true,
+    "**/node_modules": true
+  },
+
+  // Markdown settings
+  "markdown.preview.fontSize": 14,
+  "[markdown]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.formatOnSave": true
+  },
+
+  // Telemetry settings
+  "telemetry.enableTelemetry": false
+}

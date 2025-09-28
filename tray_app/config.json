@@ -1,0 +1,10 @@
+{
+  "port": 9091,
+  "default_page": "index.html",
+  "available_pages": [
+    "index.html",
+    "pages/plenary.html",
+    "pages/committees/index.html",
+    "pages/engineering/index.html"
+  ]
+}
