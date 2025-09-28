@@ -3,7 +3,7 @@
 # Default port for the development server
 PORT ?= 9001
 
-.PHONY: help serve serve-port install update clean status kill tray build-tray test-tray
+.PHONY: help serve serve-port install update clean status kill tray build-tray test-tray lint lint-fix lint-python lint-js format format-python format-js check
 
 # Default target
 help:
@@ -16,6 +16,16 @@ help:
 	@echo "  make update     - Update dependencies using UV"
 	@echo "  make status     - Check project status and dependencies"
 	@echo "  make clean      - Clean up temporary files"
+	@echo ""
+	@echo "Code Quality Commands:"
+	@echo "  make lint       - Run all linters (Python + JavaScript)"
+	@echo "  make lint-fix   - Run linters and auto-fix issues"
+	@echo "  make lint-python- Run Python linting with Ruff"
+	@echo "  make lint-js    - Run JavaScript/HTML linting with ESLint"
+	@echo "  make format     - Format all code (Python + JavaScript)"
+	@echo "  make format-python- Format Python code with Ruff"
+	@echo "  make format-js  - Format JavaScript/HTML with Prettier"
+	@echo "  make check      - Run comprehensive code quality check"
 	@echo ""
 	@echo "Tray Application Commands:"
 	@echo "  make tray       - Run the tray application (requires display)"
@@ -136,4 +146,105 @@ build-tray:
 	@uv run python scripts/build_tray.py
 	@echo "✅ Build complete"
 	@echo "  • Executable location: dist/$$(uname -s | tr '[:upper:]' '[:lower:]')/"
+	@echo ""
+
+# Code Quality Commands
+
+# Run all linters
+lint:
+	@echo "🔍 Running all linters..."
+	@echo "  • Python linting with Ruff..."
+	@$(MAKE) lint-python
+	@echo "  • JavaScript/HTML linting with ESLint..."
+	@$(MAKE) lint-js
+	@echo "✅ All linting complete"
+	@echo ""
+
+# Run linters and auto-fix issues
+lint-fix:
+	@echo "🔧 Running linters with auto-fix..."
+	@echo "  • Auto-fixing Python issues..."
+	@$(MAKE) format-python
+	@echo "  • Auto-fixing JavaScript/HTML issues..."
+	@$(MAKE) format-js
+	@echo "✅ Auto-fix complete"
+	@echo ""
+
+# Run Python linting with Ruff
+lint-python:
+	@echo "🐍 Running Python linting with Ruff..."
+	@if [ -d .venv ]; then \
+		uv run ruff check .; \
+	else \
+		echo "❌ Virtual environment not found. Run 'make install' first."; \
+		exit 1; \
+	fi
+	@echo "✅ Python linting complete"
+	@echo ""
+
+# Run JavaScript/HTML linting with ESLint
+lint-js:
+	@echo "📜 Running JavaScript/HTML linting with ESLint..."
+	@if command -v npx > /dev/null 2>&1; then \
+		npx eslint pages/js/ scripts/ --ext .js,.html || echo "⚠️  ESLint found issues (see output above)"; \
+	else \
+		echo "⚠️  npx not found. Install Node.js and npm to use ESLint."; \
+	fi
+	@echo "✅ JavaScript/HTML linting complete"
+	@echo ""
+
+# Format all code
+format:
+	@echo "✨ Formatting all code..."
+	@echo "  • Formatting Python code..."
+	@$(MAKE) format-python
+	@echo "  • Formatting JavaScript/HTML code..."
+	@$(MAKE) format-js
+	@echo "✅ All formatting complete"
+	@echo ""
+
+# Format Python code with Ruff
+format-python:
+	@echo "🐍 Formatting Python code with Ruff..."
+	@if [ -d .venv ]; then \
+		uv run ruff format . && uv run ruff check --fix .; \
+	else \
+		echo "❌ Virtual environment not found. Run 'make install' first."; \
+		exit 1; \
+	fi
+	@echo "✅ Python formatting complete"
+	@echo ""
+
+# Format JavaScript/HTML code with Prettier
+format-js:
+	@echo "📜 Formatting JavaScript/HTML code with Prettier..."
+	@if command -v npx > /dev/null 2>&1; then \
+		npx prettier --write "pages/**/*.{js,html,css}" "scripts/**/*.js" "*.html" "*.md" || echo "⚠️  Prettier found issues (see output above)"; \
+	else \
+		echo "⚠️  npx not found. Install Node.js and npm to use Prettier."; \
+	fi
+	@echo "✅ JavaScript/HTML formatting complete"
+	@echo ""
+
+# Run comprehensive code quality check
+check:
+	@echo "🔍 Running comprehensive code quality check..."
+	@echo "  • Checking Python code quality..."
+	@$(MAKE) lint-python
+	@echo "  • Checking JavaScript/HTML code quality..."
+	@$(MAKE) lint-js
+	@echo "  • Checking code formatting..."
+	@echo "    - Python formatting check..."
+	@if [ -d .venv ]; then \
+		uv run ruff format --check . && echo "✅ Python formatting is correct"; \
+	else \
+		echo "❌ Virtual environment not found. Run 'make install' first."; \
+	fi
+	@echo "    - JavaScript/HTML formatting check..."
+	@if command -v npx > /dev/null 2>&1; then \
+		npx prettier --check "pages/**/*.{js,html,css}" "scripts/**/*.js" "*.html" "*.md" && echo "✅ JavaScript/HTML formatting is correct"; \
+	else \
+		echo "⚠️  npx not found. Install Node.js and npm to use Prettier."; \
+	fi
+	@echo "✅ Comprehensive code quality check complete"
 	@echo ""

@@ -1,0 +1,33 @@
+# Dependencies
+node_modules/
+.venv/
+__pycache__/
+
+# Build outputs
+build/
+dist/
+*.egg-info/
+
+# Documentation builds
+docs/_build/
+site/
+
+# Lock files
+package-lock.json
+yarn.lock
+uv.lock
+
+# Logs
+*.log
+logs/
+
+# Generated files
+*.min.js
+*.min.css
+
+# Python
+*.py
+*.pyi
+
+# Markdown (optional - can be formatted if desired)
+# *.md

@@ -1,0 +1,20 @@
+# Dependencies
+node_modules/
+
+# Build outputs
+build/
+dist/
+
+# Python files
+*.py
+
+# Documentation
+docs/
+
+# Generated files
+*.min.js
+*.bundle.js
+
+# Service worker files (if they have different rules)
+sw.js
+service-worker.js

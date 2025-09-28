@@ -41,12 +41,47 @@
     "**/node_modules": true
   },
 
+  // Python settings
+  "[python]": {
+    "editor.defaultFormatter": "charliermarsh.ruff",
+    "editor.formatOnSave": true,
+    "editor.codeActionsOnSave": {
+      "source.organizeImports": true,
+      "source.fixAll.ruff": true
+    },
+    "editor.rulers": [88]
+  },
+
+  // JSON settings
+  "[json]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.formatOnSave": true
+  },
+
+  // YAML settings
+  "[yaml]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.formatOnSave": true
+  },
+
   // Markdown settings
   "markdown.preview.fontSize": 14,
   "[markdown]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode",
     "editor.formatOnSave": true
   },
+
+  // Ruff settings
+  "ruff.enable": true,
+  "ruff.organizeImports": true,
+  "ruff.fixAll": true,
+
+  // Black settings
+  "python.formatting.provider": "none",
+
+  // ESLint settings
+  "eslint.enable": true,
+  "eslint.validate": ["javascript", "html"],
 
   // Telemetry settings
   "telemetry.enableTelemetry": false

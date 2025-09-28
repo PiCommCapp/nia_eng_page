@@ -317,4 +317,37 @@ __marimo__/
 custom_modes/
 # optimization-journey/
 
+# =============================================================================
+# NODE.JS & NPM
+# =============================================================================
+
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.npm
+.yarn-integrity
+.pnp
+.pnp.js
+
+# NPM/Yarn
+package-lock.json
+yarn.lock
+.pnp.*
+
+# =============================================================================
+# LOG FILES
+# =============================================================================
+
+# Application logs
+*.log
+logs/
+*.log.*
+
+# Runtime logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
 # package-lock.json

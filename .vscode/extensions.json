@@ -18,17 +18,32 @@
     // Markdown support
     "yzhang.markdown-all-in-one", // Markdown tools and preview
     "davidanson.vscode-markdownlint", // Markdown linting
+    "bierner.markdown-mermaid", // Mermaid support for Markdown
 
     // Productivity tools
     "streetsidesoftware.code-spell-checker", // Spell checking
     "editorconfig.editorconfig", // EditorConfig support
-
+    "christian-kohler.path-intellisense", // Path autocompletion
     "mutantdino.resourcemonitor", // Resource monitor
-    "bierner.markdown-mermaid", // Mermaid support for Markdown
 
-    // Code navigation
-    "visualstudioexptteam.vscodeintellicode", // AI-assisted intellisense
-    "christian-kohler.path-intellisense" // Path autocompletion
+    // Git integration
+    "eamodio.gitlens", // Git blame and history
+    "mhutchie.git-graph", // Git graph visualization
+
+    // Terminal and shell
+    "ms-vscode.vscode-json", // JSON language support
+    "tamasfe.even-better-toml", // TOML language support
+
+    // Documentation and productivity
+    "shd101wyy.markdown-preview-enhanced", // Enhanced markdown preview
+    "gruntfuggly.todo-tree", // TODO tree view
+    "alefragnani.bookmarks" // Code bookmarks
   ],
-  "unwantedRecommendations": []
+  "unwantedRecommendations": [
+    // Microsoft extensions we want to avoid
+    "ms-python.python",
+    "ms-python.pylint",
+    "ms-vscode.vscode-json",
+    "visualstudioexptteam.vscodeintellicode"
+  ]
 }
