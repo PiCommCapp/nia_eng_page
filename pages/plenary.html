@@ -6,215 +6,18 @@
     <title>Plenary - NIA Engineering Portal</title>
     <meta name="description" content="Plenary operations and streaming" />
     <meta name="theme-color" content="#1a365d" />
-    <style>
-      :root {
-        --primary: #1a365d;
-        --secondary: #2d3748;
-        --accent: #3182ce;
-        --success: #38a169;
-        --warning: #d69e2e;
-        --danger: #e53e3e;
-        --light: #f7fafc;
-        --dark: #2d3748;
-        --text: #2d3748;
-        --text-light: #718096;
-      }
-
-      * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-      }
-
-      body {
-        font-family:
-          -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-        background: var(--light);
-        color: var(--text);
-        line-height: 1.6;
-      }
-
-      .container {
-        max-width: 1200px;
-        margin: 0 auto;
-        padding: 0 1rem;
-      }
-
-      header {
-        background: var(--primary);
-        color: white;
-        padding: 1rem 0;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-      }
-
-      .header-content {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-      }
-
-      h1 {
-        font-size: 1.5rem;
-        font-weight: 600;
-      }
-
-      .status {
-        padding: 0.25rem 0.75rem;
-        border-radius: 9999px;
-        font-size: 0.875rem;
-        font-weight: 500;
-      }
-
-      .status.online {
-        background: var(--success);
-        color: white;
-      }
-
-      .status.offline {
-        background: var(--danger);
-        color: white;
-      }
-
-      main {
-        padding: 2rem 0;
-      }
-
-      .breadcrumb {
-        background: white;
-        padding: 1rem;
-        border-radius: 8px;
-        margin-bottom: 1rem;
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-      }
-
-      .breadcrumb a {
-        color: var(--accent);
-        text-decoration: none;
-      }
-
-      .breadcrumb a:hover {
-        text-decoration: underline;
-      }
-
-      .breadcrumb .separator {
-        margin: 0 0.5rem;
-        color: var(--text-light);
-      }
-
-      .role-selection {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-        gap: 1rem;
-        margin-bottom: 2rem;
-      }
-
-      .role-card {
-        background: white;
-        border-radius: 8px;
-        padding: 1.5rem;
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-        transition: all 0.2s ease;
-        text-decoration: none;
-        color: inherit;
-        display: block;
-        text-align: center;
-      }
-
-      .role-card:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-      }
-
-      .role-card.operator {
-        border-left: 4px solid var(--accent);
-      }
-
-      .role-card.engineer {
-        border-left: 4px solid var(--warning);
-      }
-
-      .role-card h2 {
-        color: var(--primary);
-        margin-bottom: 0.5rem;
-        font-size: 1.25rem;
-      }
-
-      .role-card .icon {
-        font-size: 2rem;
-        margin-bottom: 0.5rem;
-        display: block;
-      }
-
-      .links-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-        gap: 1rem;
-      }
-
-      .link-card {
-        background: white;
-        border-radius: 8px;
-        padding: 1rem;
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-        transition: all 0.2s ease;
-        text-decoration: none;
-        color: inherit;
-        display: block;
-      }
-
-      .link-card:hover {
-        transform: translateY(-1px);
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-      }
-
-      .link-card h3 {
-        color: var(--primary);
-        margin-bottom: 0.25rem;
-        font-size: 1rem;
-      }
-
-      .link-card .url {
-        color: var(--text-light);
-        font-size: 0.875rem;
-        font-family: monospace;
-      }
-
-      .section {
-        margin-bottom: 2rem;
-      }
-
-      .section h2 {
-        color: var(--primary);
-        margin-bottom: 1rem;
-        font-size: 1.25rem;
-      }
-
-      footer {
-        background: var(--secondary);
-        color: white;
-        padding: 1rem 0;
-        margin-top: 2rem;
-        text-align: center;
-        font-size: 0.875rem;
-      }
-
-      @media (max-width: 768px) {
-        .role-selection {
-          grid-template-columns: 1fr;
-        }
-
-        .links-grid {
-          grid-template-columns: 1fr;
-        }
-      }
-    </style>
-  </head>
+    
+      <link rel="stylesheet" href="css/common.css" />
+</head>
   <body>
     <header>
       <div class="container">
         <div class="header-content">
           <h1>Plenary Operations</h1>
           <div class="status online" id="status">Online</div>
+          <noscript>
+            <div class="status" style="background: var(--warning); color: white;">Status Unknown (JS Disabled)</div>
+          </noscript>
         </div>
       </div>
     </header>
@@ -228,13 +31,13 @@
         </div>
 
         <div class="role-selection">
-          <a href="#operator" class="role-card operator">
+          <a href="plenary-operator.html" class="role-card operator">
             <span class="icon">🎥</span>
             <h2>Operator</h2>
             <p>Camera control and streaming</p>
           </a>
 
-          <a href="#engineer" class="role-card engineer">
+          <a href="plenary-engineer.html" class="role-card engineer">
             <span class="icon">🔧</span>
             <h2>Engineer</h2>
             <p>Technical systems and monitoring</p>
@@ -345,5 +148,8 @@
       window.addEventListener("offline", updateStatus);
       updateStatus();
     </script>
-  </body>
+      
+    <!-- Performance Monitoring -->
+    <script src="js/performance.js"></script>
+</body>
 </html>

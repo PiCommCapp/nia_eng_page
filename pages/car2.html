@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CAR 2 - NIA Engineering Portal</title>
+    <meta name="description" content="CAR 2 Plenary and Committee room systems" />
+    <meta name="theme-color" content="#1a365d" />
+    
+      <link rel="stylesheet" href="css/common.css" />
+</head>
+  <body>
+    <header>
+      <div class="container">
+        <div class="header-content">
+          <h1>CAR 2</h1>
+          <div class="status online" id="status">Online</div>
+          <noscript>
+            <div class="status" style="background: var(--warning); color: white;">Status Unknown (JS Disabled)</div>
+          </noscript>
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <div class="container">
+        <div class="breadcrumb">
+          <a href="index.html">Home</a>
+          <span class="separator">></span>
+          <a href="engineering.html">Engineering</a>
+          <span class="separator">></span>
+          <a href="network.html">Network</a>
+          <span class="separator">></span>
+          <span>CAR 2</span>
+        </div>
+
+        <div class="section">
+          <h2>Plenary</h2>
+          <div class="links-grid">
+            <a
+              href="http://10.63.82.40:49151/v1/base/cheetah_login.html"
+              class="link-card"
+              target="_blank"
+            >
+              <h3>BC-CTL-CAR2-CORE</h3>
+              <div class="url">10.63.82.40:49151</div>
+            </a>
+
+            <a
+              href="http://10.63.82.41:49151/v1/base/cheetah_login.html"
+              class="link-card"
+              target="_blank"
+            >
+              <h3>BC-CTL-CAR2-EDGE1</h3>
+              <div class="url">10.63.82.41:49151</div>
+            </a>
+
+            <a
+              href="http://10.63.82.42:49151/v1/base/cheetah_login.html"
+              class="link-card"
+              target="_blank"
+            >
+              <h3>BC-CTL-CAR2-EDGE2</h3>
+              <div class="url">10.63.82.42:49151</div>
+            </a>
+
+            <a
+              href="http://10.63.82.43:49151/v1/base/cheetah_login.html"
+              class="link-card"
+              target="_blank"
+            >
+              <h3>BC-CTL-CAR2-EDGE3</h3>
+              <div class="url">10.63.82.43:49151</div>
+            </a>
+
+            <a
+              href="http://10.63.82.44:49151/v1/base/cheetah_login.html"
+              class="link-card"
+              target="_blank"
+            >
+              <h3>BC-CTL-CAR2-EDGE4</h3>
+              <div class="url">10.63.82.44:49151</div>
+            </a>
+
+            <a
+              href="http://10.63.82.45:49151/v1/base/cheetah_login.html"
+              class="link-card"
+              target="_blank"
+            >
+              <h3>BC-CTL-CAR2-EDGE5</h3>
+              <div class="url">10.63.82.45:49151</div>
+            </a>
+
+            <a
+              href="http://10.63.82.46:49151/v1/base/cheetah_login.html"
+              class="link-card"
+              target="_blank"
+            >
+              <h3>BC-CTL-CAR2-EDGE6</h3>
+              <div class="url">10.63.82.46:49151</div>
+            </a>
+
+            <a
+              href="http://10.63.82.47:49151/v1/base/cheetah_login.html"
+              class="link-card"
+              target="_blank"
+            >
+              <h3>BC-CTL-CAR2-EDGE7</h3>
+              <div class="url">10.63.82.47:49151</div>
+            </a>
+
+            <a
+              href="http://10.63.82.48:49151/v1/base/cheetah_login.html"
+              class="link-card"
+              target="_blank"
+            >
+              <h3>BC-CTL-CAR2-EDGE8</h3>
+              <div class="url">10.63.82.48:49151</div>
+            </a>
+          </div>
+        </div>
+
+        <div class="section">
+          <h2>Committees</h2>
+          <div class="links-grid">
+            <a
+              href="http://10.63.82.71:49151/v1/base/cheetah_login.html"
+              class="link-card"
+              target="_blank"
+            >
+              <h3>SW-CR21-CR29-CAR2</h3>
+              <div class="url">10.63.82.71:49151</div>
+            </a>
+
+            <a
+              href="http://10.63.82.72:49151/v1/base/cheetah_login.html"
+              class="link-card"
+              target="_blank"
+            >
+              <h3>SW-CR30-SEN-CAR2</h3>
+              <div class="url">10.63.82.72:49151</div>
+            </a>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <script>
+      function updateStatus() {
+        const status = document.getElementById("status");
+        if (navigator.onLine) {
+          status.textContent = "Online";
+          status.className = "status online";
+        } else {
+          status.textContent = "Offline";
+          status.className = "status offline";
+        }
+      }
+
+      window.addEventListener("online", updateStatus);
+      window.addEventListener("offline", updateStatus);
+      updateStatus();
+    </script>
+      
+    <!-- Performance Monitoring -->
+    <script src="js/performance.js"></script>
+</body>
+</html>

@@ -9,8 +9,23 @@
       content="Lightning-fast access to engineering systems for broadcast/AV infrastructure"
     />
     <meta name="theme-color" content="#1a365d" />
+
+    <!-- Preload critical CSS for faster rendering -->
+    <link
+      rel="preload"
+      href="css/common.css"
+      as="style"
+      onload="this.onload=null;this.rel='stylesheet'"
+    />
+    <noscript><link rel="stylesheet" href="css/common.css" /></noscript>
+
+    <!-- Preconnect to external domains for faster resource loading -->
+    <link rel="preconnect" href="https://www.picomms.tv" />
+    <link rel="preconnect" href="https://www.niassembly.gov.uk" />
+    <link rel="preconnect" href="https://airtable.com" />
+
+    <!-- Critical CSS for above-the-fold content -->
     <style>
-      /* Critical CSS for immediate rendering */
       :root {
         --primary: #1a365d;
         --secondary: #2d3748;
@@ -23,13 +38,11 @@
         --text: #2d3748;
         --text-light: #718096;
       }
-
       * {
         margin: 0;
         padding: 0;
         box-sizing: border-box;
       }
-
       body {
         font-family:
           -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
@@ -37,59 +50,49 @@
         color: var(--text);
         line-height: 1.6;
       }
-
       .container {
         max-width: 1200px;
         margin: 0 auto;
         padding: 0 1rem;
       }
-
       header {
         background: var(--primary);
         color: white;
         padding: 1rem 0;
         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
       }
-
       .header-content {
         display: flex;
         justify-content: space-between;
         align-items: center;
       }
-
       h1 {
         font-size: 1.5rem;
         font-weight: 600;
       }
-
       .status {
         padding: 0.25rem 0.75rem;
         border-radius: 9999px;
         font-size: 0.875rem;
         font-weight: 500;
       }
-
       .status.online {
         background: var(--success);
         color: white;
       }
-
       .status.offline {
         background: var(--danger);
         color: white;
       }
-
       main {
         padding: 2rem 0;
       }
-
       .nav-grid {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
         gap: 1.5rem;
         margin-bottom: 2rem;
       }
-
       .nav-card {
         background: white;
         border-radius: 8px;
@@ -100,65 +103,28 @@
         color: inherit;
         display: block;
       }
-
       .nav-card:hover {
         transform: translateY(-2px);
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
       }
-
       .nav-card h2 {
         color: var(--primary);
         margin-bottom: 0.5rem;
         font-size: 1.25rem;
       }
-
       .nav-card p {
         color: var(--text-light);
         margin-bottom: 1rem;
       }
-
       .nav-card .icon {
         font-size: 2rem;
         margin-bottom: 0.5rem;
         display: block;
       }
-
-      .breadcrumb {
-        background: white;
-        padding: 1rem;
-        border-radius: 8px;
-        margin-bottom: 1rem;
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-      }
-
-      .breadcrumb a {
-        color: var(--accent);
-        text-decoration: none;
-      }
-
-      .breadcrumb a:hover {
-        text-decoration: underline;
-      }
-
-      .breadcrumb .separator {
-        margin: 0 0.5rem;
-        color: var(--text-light);
-      }
-
-      footer {
-        background: var(--secondary);
-        color: white;
-        padding: 1rem 0;
-        margin-top: 2rem;
-        text-align: center;
-        font-size: 0.875rem;
-      }
-
       @media (max-width: 768px) {
         .nav-grid {
           grid-template-columns: 1fr;
         }
-
         .header-content {
           flex-direction: column;
           gap: 1rem;
@@ -172,6 +138,11 @@
         <div class="header-content">
           <h1>NIA Engineering Portal</h1>
           <div class="status online" id="status">Online</div>
+          <noscript>
+            <div class="status" style="background: var(--warning); color: white">
+              Status Unknown (JS Disabled)
+            </div>
+          </noscript>
         </div>
       </div>
     </header>
@@ -226,6 +197,23 @@
       window.addEventListener("online", updateStatus);
       window.addEventListener("offline", updateStatus);
       updateStatus();
+
+      // Register service worker for offline functionality
+      if ("serviceWorker" in navigator) {
+        window.addEventListener("load", function () {
+          navigator.serviceWorker
+            .register("sw.js")
+            .then(function (registration) {
+              console.log("ServiceWorker registration successful");
+            })
+            .catch(function (err) {
+              console.log("ServiceWorker registration failed");
+            });
+        });
+      }
     </script>
+
+    <!-- Performance Monitoring -->
+    <script src="js/performance.js"></script>
   </body>
 </html>

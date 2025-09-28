@@ -4,7 +4,9 @@
   "description": "A lightning-fast, mission-critical engineering portal for broadcast/AV infrastructure access",
   "main": "index.html",
   "scripts": {
-    "start": "npx live-server --port=5500 --no-browser",
+    "start": "make serve",
+    "serve": "make serve",
+    "serve-port": "make serve-port",
     "convert": "node scripts/convert-bookmarks.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },

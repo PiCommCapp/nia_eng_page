@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>B23 - NIA Engineering Portal</title>
+    <meta name="description" content="Committee room systems in B23" />
+    <meta name="theme-color" content="#1a365d" />
+    
+      <link rel="stylesheet" href="css/common.css" />
+</head>
+  <body>
+    <header>
+      <div class="container">
+        <div class="header-content">
+          <h1>B23</h1>
+          <div class="status online" id="status">Online</div>
+          <noscript>
+            <div class="status" style="background: var(--warning); color: white;">Status Unknown (JS Disabled)</div>
+          </noscript>
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <div class="container">
+        <div class="breadcrumb">
+          <a href="index.html">Home</a>
+          <span class="separator">></span>
+          <a href="engineering.html">Engineering</a>
+          <span class="separator">></span>
+          <a href="network.html">Network</a>
+          <span class="separator">></span>
+          <span>B23</span>
+        </div>
+
+        <div class="section">
+          <h2>Committee Rooms</h2>
+          <div class="links-grid">
+            <a
+              href="http://10.63.82.73:49151/v1/base/cheetah_login.html"
+              class="link-card"
+              target="_blank"
+            >
+              <h3>SW-CSCR21-B23</h3>
+              <div class="url">10.63.82.73:49151</div>
+            </a>
+
+            <a
+              href="http://10.63.82.74:49151/v1/base/cheetah_login.html"
+              class="link-card"
+              target="_blank"
+            >
+              <h3>SW-CSCR29-B23</h3>
+              <div class="url">10.63.82.74:49151</div>
+            </a>
+
+            <a
+              href="http://10.63.82.75:49151/v1/base/cheetah_login.html"
+              class="link-card"
+              target="_blank"
+            >
+              <h3>SW-CSCR30-B23</h3>
+              <div class="url">10.63.82.75:49151</div>
+            </a>
+
+            <a
+              href="http://10.63.82.76:49151/v1/base/cheetah_login.html"
+              class="link-card"
+              target="_blank"
+            >
+              <h3>SW-CRSEN-B23</h3>
+              <div class="url">10.63.82.76:49151</div>
+            </a>
+
+            <a
+              href="http://10.63.82.77:49151/v1/base/cheetah_login.html"
+              class="link-card"
+              target="_blank"
+            >
+              <h3>SW-CRGBL-B23</h3>
+              <div class="url">10.63.82.77:49151</div>
+            </a>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <script>
+      function updateStatus() {
+        const status = document.getElementById("status");
+        if (navigator.onLine) {
+          status.textContent = "Online";
+          status.className = "status online";
+        } else {
+          status.textContent = "Offline";
+          status.className = "status offline";
+        }
+      }
+
+      window.addEventListener("online", updateStatus);
+      window.addEventListener("offline", updateStatus);
+      updateStatus();
+    </script>
+      
+    <!-- Performance Monitoring -->
+    <script src="js/performance.js"></script>
+</body>
+</html>
