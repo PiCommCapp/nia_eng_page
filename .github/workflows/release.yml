@@ -64,12 +64,6 @@ jobs:
         export DISPLAY=:99
         Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
 
-    - name: Configure Git
-      run: |
-        git config --global user.name "GitHub Actions"
-        git config --global user.email "actions@github.com"
-
-
     - name: Run tests (Ubuntu)
       if: ${{ !github.event.inputs.skip_tests && matrix.os == 'ubuntu-latest' }}
       run: |

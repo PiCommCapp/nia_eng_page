@@ -81,6 +81,7 @@ The NIA Engineering Portal is now **production-ready** with all core features im
   - Separated platform-specific steps to avoid shell syntax conflicts
   - Fixed Unicode encoding issues in version script for Windows compatibility
   - Moved version bumping to release job to avoid duplicate version updates
+  - Fixed Git configuration missing in release job causing tag creation failures
 - **Code Linting and Quality Improvements**: Resolved all Python linting errors, improved code quality, and established consistent coding standards across the project
   - Fixed bare except clauses and improved error handling
   - Resolved import order issues with proper noqa comments
