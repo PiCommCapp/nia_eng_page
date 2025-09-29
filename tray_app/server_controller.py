@@ -3,17 +3,18 @@ Server controller for the NIA Engineering Portal tray application.
 Manages the web server process, including start/stop and port conflict handling.
 """
 
+import logging
 import os
+import socket
 import subprocess
 import threading
 import time
-import socket
 import webbrowser
+from collections.abc import Callable
 from pathlib import Path
-from typing import Optional, Callable
-import logging
 
 logger = logging.getLogger(__name__)
+
 
 class ServerController:
     """Manages the web server process."""
@@ -25,10 +26,10 @@ class ServerController:
             config_manager: Configuration manager instance
         """
         self.config_manager = config_manager
-        self.server_process: Optional[subprocess.Popen] = None
-        self.server_thread: Optional[threading.Thread] = None
+        self.server_process: subprocess.Popen | None = None
+        self.server_thread: threading.Thread | None = None
         self.is_running = False
-        self.status_callback: Optional[Callable] = None
+        self.status_callback: Callable | None = None
 
         # Get the project root directory
         self.project_root = Path(__file__).parent.parent
@@ -62,7 +63,7 @@ class ServerController:
         """
         try:
             with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-                s.bind(('localhost', port))
+                s.bind(("localhost", port))
                 return True
         except OSError:
             return False
@@ -112,16 +113,16 @@ class ServerController:
         try:
             # Set environment variables
             env = os.environ.copy()
-            env['PORT'] = str(port)
+            env["PORT"] = str(port)
 
             # Start the server process
             self.server_process = subprocess.Popen(
-                ['uv', 'run', 'python', str(self.serve_script)],
+                ["uv", "run", "python", str(self.serve_script)],
                 cwd=str(self.project_root),
                 env=env,
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
-                text=True
+                text=True,
             )
 
             # Start monitoring thread
@@ -222,7 +223,11 @@ class ServerController:
         Returns:
             Status string: 'running', 'stopped', or 'error'
         """
-        if self.is_running and self.server_process and self.server_process.poll() is None:
+        if (
+            self.is_running
+            and self.server_process
+            and self.server_process.poll() is None
+        ):
             return "running"
         elif not self.is_running:
             return "stopped"

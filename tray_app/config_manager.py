@@ -4,12 +4,12 @@ Handles loading, saving, and validation of configuration settings.
 """
 
 import json
-import os
-from pathlib import Path
-from typing import Dict, Any, Optional
 import logging
+from pathlib import Path
+from typing import Any
 
 logger = logging.getLogger(__name__)
+
 
 class ConfigManager:
     """Manages application configuration."""
@@ -27,15 +27,36 @@ class ConfigManager:
             "available_pages": [
                 "index.html",
                 "pages/plenary.html",
-                "pages/committees/index.html",
-                "pages/engineering/index.html"
-            ]
+                "pages/plenary-operator.html",
+                "pages/plenary-engineer.html",
+                "pages/committees.html",
+                "pages/cr21.html",
+                "pages/cr21-operator.html",
+                "pages/cr21-engineer.html",
+                "pages/cr29.html",
+                "pages/cr29-operator.html",
+                "pages/cr29-engineer.html",
+                "pages/cr30.html",
+                "pages/cr30-operator.html",
+                "pages/cr30-engineer.html",
+                "pages/senate.html",
+                "pages/senate-operator.html",
+                "pages/senate-engineer.html",
+                "pages/engineering.html",
+                "pages/kvm.html",
+                "pages/network.html",
+                "pages/firewalls.html",
+                "pages/dante.html",
+                "pages/car2.html",
+                "pages/cta.html",
+                "pages/b23.html",
+            ],
         }
         # Initialize config as None first
         self.config = None
         self.config = self.load_config()
 
-    def load_config(self) -> Dict[str, Any]:
+    def load_config(self) -> dict[str, Any]:
         """Load configuration from file or create default.
 
         Returns:
@@ -43,7 +64,7 @@ class ConfigManager:
         """
         try:
             if self.config_file.exists():
-                with open(self.config_file, 'r') as f:
+                with open(self.config_file) as f:
                     config = json.load(f)
                 logger.info(f"Configuration loaded from {self.config_file}")
                 return self._validate_config(config)
@@ -61,7 +82,7 @@ class ConfigManager:
             True if successful, False otherwise
         """
         try:
-            with open(self.config_file, 'w') as f:
+            with open(self.config_file, "w") as f:
                 json.dump(self.config, f, indent=2)
             logger.info(f"Configuration saved to {self.config_file}")
             return True
@@ -69,7 +90,7 @@ class ConfigManager:
             logger.error(f"Error saving configuration: {e}")
             return False
 
-    def _validate_config(self, config: Dict[str, Any]) -> Dict[str, Any]:
+    def _validate_config(self, config: dict[str, Any]) -> dict[str, Any]:
         """Validate configuration and fix any issues.
 
         Args:
@@ -85,14 +106,18 @@ class ConfigManager:
             if 1024 <= config["port"] <= 65535:
                 validated["port"] = config["port"]
             else:
-                logger.warning(f"Invalid port {config['port']}, using default {self.default_config['port']}")
+                logger.warning(
+                    f"Invalid port {config['port']}, using default {self.default_config['port']}"
+                )
 
         # Validate default page
         if "default_page" in config and isinstance(config["default_page"], str):
             if config["default_page"] in self.default_config["available_pages"]:
                 validated["default_page"] = config["default_page"]
             else:
-                logger.warning(f"Invalid default page {config['default_page']}, using default {self.default_config['default_page']}")
+                logger.warning(
+                    f"Invalid default page {config['default_page']}, using default {self.default_config['default_page']}"
+                )
 
         # Validate available pages (keep default if invalid)
         if "available_pages" in config and isinstance(config["available_pages"], list):
@@ -101,7 +126,7 @@ class ConfigManager:
 
         return validated
 
-    def _create_default_config(self) -> Dict[str, Any]:
+    def _create_default_config(self) -> dict[str, Any]:
         """Create and save default configuration.
 
         Returns:
@@ -110,7 +135,7 @@ class ConfigManager:
         config = self.default_config.copy()
         # Save config directly without using self.config
         try:
-            with open(self.config_file, 'w') as f:
+            with open(self.config_file, "w") as f:
                 json.dump(config, f, indent=2)
             logger.info(f"Default configuration saved to {self.config_file}")
         except Exception as e:
@@ -177,7 +202,9 @@ class ConfigManager:
         Returns:
             True if valid and set, False otherwise
         """
-        available_pages = self.get("available_pages", self.default_config["available_pages"])
+        available_pages = self.get(
+            "available_pages", self.default_config["available_pages"]
+        )
         if page in available_pages:
             self.set("default_page", page)
             return True

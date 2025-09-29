@@ -4,38 +4,39 @@ Add Performance Monitoring Script
 Adds performance monitoring to all HTML pages
 """
 
-import os
-import re
 import glob
+import re
+
 
 def add_performance_monitoring(file_path):
     """Add performance monitoring script to a single HTML file"""
     print(f"Processing {file_path}...")
 
-    with open(file_path, 'r', encoding='utf-8') as f:
+    with open(file_path, encoding="utf-8") as f:
         content = f.read()
 
     # Check if performance monitoring is already added
-    if 'js/performance.js' in content:
+    if "js/performance.js" in content:
         print(f"  Already has performance monitoring: {file_path}")
         return
 
     # Add performance monitoring script before closing body tag
     performance_script = '    \n    <!-- Performance Monitoring -->\n    <script src="js/performance.js"></script>\n'
-    content = re.sub(r'(</body>)', performance_script + r'\1', content)
+    content = re.sub(r"(</body>)", performance_script + r"\1", content)
 
     # Write back to file
-    with open(file_path, 'w', encoding='utf-8') as f:
+    with open(file_path, "w", encoding="utf-8") as f:
         f.write(content)
 
     print(f"  Added performance monitoring: {file_path}")
+
 
 def main():
     """Main function to add performance monitoring to all pages"""
     print("Adding performance monitoring to all pages...")
 
     # Get all HTML files in pages directory
-    html_files = glob.glob('pages/*.html')
+    html_files = glob.glob("pages/*.html")
 
     print(f"Found {len(html_files)} HTML files to process")
 
@@ -44,6 +45,7 @@ def main():
 
     print("Performance monitoring addition complete!")
     print(f"Total files processed: {len(html_files)}")
+
 
 if __name__ == "__main__":
     main()

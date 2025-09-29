@@ -3,13 +3,13 @@ Main tray application for the NIA Engineering Portal.
 Provides system tray integration with icon, menu, and status indication.
 """
 
+import logging
+
 import pystray
 from PIL import Image, ImageDraw
-import threading
-import logging
-from typing import Optional
 
 logger = logging.getLogger(__name__)
+
 
 class TrayApplication:
     """Main tray application class."""
@@ -36,9 +36,9 @@ class TrayApplication:
         """Create the system tray icon."""
         # Create icon images for different states
         self.icon_images = {
-            'stopped': self._create_icon_image('red'),
-            'running': self._create_icon_image('green'),
-            'error': self._create_icon_image('gray')
+            "stopped": self._create_icon_image("red"),
+            "running": self._create_icon_image("green"),
+            "error": self._create_icon_image("gray"),
         }
 
         # Create menu
@@ -47,9 +47,9 @@ class TrayApplication:
         # Create tray icon
         self.icon = pystray.Icon(
             "NIA Engineering Portal",
-            self.icon_images['stopped'],
+            self.icon_images["stopped"],
             "NIA Engineering Portal - Server stopped",
-            menu
+            menu,
         )
 
     def _create_icon_image(self, color: str) -> Image.Image:
@@ -63,17 +63,17 @@ class TrayApplication:
         """
         # Create a simple "www" icon
         size = 64
-        image = Image.new('RGBA', (size, size), (0, 0, 0, 0))
+        image = Image.new("RGBA", (size, size), (0, 0, 0, 0))
         draw = ImageDraw.Draw(image)
 
         # Color mapping
         colors = {
-            'red': (255, 0, 0, 255),
-            'green': (0, 255, 0, 255),
-            'gray': (128, 128, 128, 255)
+            "red": (255, 0, 0, 255),
+            "green": (0, 255, 0, 255),
+            "gray": (128, 128, 128, 255),
         }
 
-        color_rgba = colors.get(color, colors['gray'])
+        color_rgba = colors.get(color, colors["gray"])
 
         # Draw a simple "www" representation
         # Draw three circles representing "www"
@@ -85,8 +85,13 @@ class TrayApplication:
         for i in range(3):
             x = start_x + i * (spacing + circle_radius * 2)
             draw.ellipse(
-                [x, start_y - circle_radius, x + circle_radius * 2, start_y + circle_radius],
-                fill=color_rgba
+                [
+                    x,
+                    start_y - circle_radius,
+                    x + circle_radius * 2,
+                    start_y + circle_radius,
+                ],
+                fill=color_rgba,
             )
 
         return image
@@ -97,72 +102,54 @@ class TrayApplication:
         Returns:
             pystray Menu object
         """
-        return pystray.Menu(
-            pystray.MenuItem(
-                "NIA Engineering Portal",
-                self._update_status_text,
-                enabled=False
-            ),
-            pystray.Menu.SEPARATOR,
-            pystray.MenuItem(
-                "Start Server",
-                self._start_server,
-                default=True
-            ),
-            pystray.MenuItem(
-                "Stop Server",
-                self._stop_server
-            ),
-            pystray.MenuItem(
-                "Open Portal",
-                self._open_portal
-            ),
-            pystray.Menu.SEPARATOR,
-            pystray.MenuItem(
-                "Configure...",
-                self._show_configuration
-            ),
-            pystray.Menu.SEPARATOR,
-            pystray.MenuItem(
-                "Exit",
-                self._exit_application
-            )
-        )
-
-    def _update_status_text(self) -> None:
-        """Update the status text in the menu."""
+        # Get current status for the menu text
         status = self.server_controller.get_status()
         port = self.server_controller.get_port()
 
         if status == "running":
-            text = f"🟢 Server running on port {port}"
+            status_text = f"🟢 Server running on port {port}"
         elif status == "stopped":
-            text = f"🔴 Server stopped"
+            status_text = "🔴 Server stopped"
         else:
-            text = f"⚠️ Server error"
+            status_text = "⚠️ Server error"
 
-        # Update the first menu item text
-        if self.icon and self.icon.menu:
-            self.icon.menu._items[0].text = text
+        return pystray.Menu(
+            pystray.MenuItem(status_text, None, enabled=False),
+            pystray.Menu.SEPARATOR,
+            pystray.MenuItem("Start Server", self._start_server, default=True),
+            pystray.MenuItem("Stop Server", self._stop_server),
+            pystray.MenuItem("Open Portal", self._open_portal),
+            pystray.Menu.SEPARATOR,
+            pystray.MenuItem("Configure...", self._show_configuration),
+            pystray.Menu.SEPARATOR,
+            pystray.MenuItem("Exit", self._exit_application),
+        )
+
+    def _update_status_text(self) -> None:
+        """Update the status text in the menu."""
+        if self.icon:
+            # Create a new menu with updated status text
+            menu = self._create_menu()
+            self.icon.menu = menu
 
     def _start_server(self, icon=None, item=None) -> None:
         """Start the server."""
         logger.info("Starting server from tray menu")
         if self.server_controller.start_server():
-            self._update_icon('running')
+            self._update_icon("running")
             self._update_status_text()
         else:
-            self._update_icon('error')
+            self._update_icon("error")
             self._update_status_text()
 
     def _stop_server(self, icon=None, item=None) -> None:
         """Stop the server."""
         logger.info("Stopping server from tray menu")
         if self.server_controller.stop_server():
-            self._update_icon('stopped')
+            self._update_icon("stopped")
             self._update_status_text()
         else:
-            self._update_icon('error')
+            self._update_icon("error")
             self._update_status_text()
 
     def _open_portal(self, icon=None, item=None) -> None:

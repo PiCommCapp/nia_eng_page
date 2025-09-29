@@ -4,11 +4,11 @@ Build script for the NIA Engineering Portal tray application.
 Handles cross-platform executable generation using PyInstaller.
 """
 
-import os
-import sys
-import subprocess
 import platform
+import subprocess
+import sys
 from pathlib import Path
+
 
 def run_command(cmd, cwd=None):
     """Run a command and return the result."""
@@ -20,6 +20,7 @@ def run_command(cmd, cwd=None):
     print(f"Success: {result.stdout}")
     return True
 
+
 def build_linux():
     """Build for Linux."""
     print("Building for Linux...")
@@ -29,13 +30,10 @@ def build_linux():
     dist_dir.mkdir(parents=True, exist_ok=True)
 
     # Build with PyInstaller
-    cmd = [
-        "uv", "run", "pyinstaller",
-        "--clean",
-        "tray_app.spec"
-    ]
+    cmd = ["uv", "run", "pyinstaller", "--clean", "tray_app.spec"]
 
     return run_command(cmd)
+
 
 def build_windows():
     """Build for Windows (if running on Windows or with Wine)."""
@@ -46,13 +44,10 @@ def build_windows():
     dist_dir.mkdir(parents=True, exist_ok=True)
 
     # Build with PyInstaller
-    cmd = [
-        "uv", "run", "pyinstaller",
-        "--clean",
-        "tray_app.spec"
-    ]
+    cmd = ["uv", "run", "pyinstaller", "--clean", "tray_app.spec"]
 
     return run_command(cmd)
+
 
 def build_macos():
     """Build for macOS."""
@@ -63,13 +58,10 @@ def build_macos():
     dist_dir.mkdir(parents=True, exist_ok=True)
 
     # Build with PyInstaller
-    cmd = [
-        "uv", "run", "pyinstaller",
-        "--clean",
-        "tray_app.spec"
-    ]
+    cmd = ["uv", "run", "pyinstaller", "--clean", "tray_app.spec"]
 
     return run_command(cmd)
+
 
 def main():
     """Main build function."""
@@ -83,8 +75,9 @@ def main():
 
     # Check if PyInstaller is available
     try:
-        subprocess.run(["uv", "run", "pyinstaller", "--version"],
-                      capture_output=True, check=True)
+        subprocess.run(
+            ["uv", "run", "pyinstaller", "--version"], capture_output=True, check=True
+        )
     except subprocess.CalledProcessError:
         print("Error: PyInstaller not available. Install with: uv add pyinstaller")
         sys.exit(1)
@@ -108,6 +101,7 @@ def main():
     else:
         print("Build failed!")
         sys.exit(1)
+
 
 if __name__ == "__main__":
     main()

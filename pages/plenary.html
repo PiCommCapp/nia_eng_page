@@ -1,4 +1,4 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -6,9 +6,10 @@
     <title>Plenary - NIA Engineering Portal</title>
     <meta name="description" content="Plenary operations and streaming" />
     <meta name="theme-color" content="#1a365d" />
-    
-      <link rel="stylesheet" href="css/common.css" />
-</head>
+
+    <!-- Load CSS for styling -->
+    <link rel="stylesheet" href="css/common.css" />
+  </head>
   <body>
     <header>
       <div class="container">
@@ -16,7 +17,9 @@
           <h1>Plenary Operations</h1>
           <div class="status online" id="status">Online</div>
           <noscript>
-            <div class="status" style="background: var(--warning); color: white;">Status Unknown (JS Disabled)</div>
+            <div class="status" style="background: var(--warning); color: white">
+              Status Unknown (JS Disabled)
+            </div>
           </noscript>
         </div>
       </div>
@@ -134,22 +137,22 @@
 
     <script>
       function updateStatus() {
-        const status = document.getElementById("status");
+        const status = document.getElementById('status');
         if (navigator.onLine) {
-          status.textContent = "Online";
-          status.className = "status online";
+          status.textContent = 'Online';
+          status.className = 'status online';
         } else {
-          status.textContent = "Offline";
-          status.className = "status offline";
+          status.textContent = 'Offline';
+          status.className = 'status offline';
         }
       }
 
-      window.addEventListener("online", updateStatus);
-      window.addEventListener("offline", updateStatus);
+      window.addEventListener('online', updateStatus);
+      window.addEventListener('offline', updateStatus);
       updateStatus();
     </script>
-      
+
     <!-- Performance Monitoring -->
     <script src="js/performance.js"></script>
-</body>
+  </body>
 </html>

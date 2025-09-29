@@ -1,0 +1,124 @@
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version_type:
+        description: 'Version bump type'
+        required: true
+        default: 'patch'
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
+      skip_tests:
+        description: 'Skip tests (for emergency releases)'
+        required: false
+        default: false
+        type: boolean
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0  # Fetch full history for version bumping
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.12'
+
+    - name: Install UV
+      run: |
+        curl -LsSf https://astral.sh/uv/install.sh | sh
+        echo "$HOME/.cargo/bin" >> $GITHUB_PATH
+
+    - name: Install dependencies
+      run: |
+        uv sync
+
+    - name: Configure Git
+      run: |
+        git config --global user.name "GitHub Actions"
+        git config --global user.email "actions@github.com"
+
+    - name: Bump version
+      run: |
+        echo "Bumping ${{ github.event.inputs.version_type }} version..."
+        uv run python scripts/version.py bump ${{ github.event.inputs.version_type }}
+
+        # Get the new version
+        NEW_VERSION=$(uv run python scripts/version.py get)
+        echo "NEW_VERSION=$NEW_VERSION" >> $GITHUB_ENV
+        echo "New version: $NEW_VERSION"
+
+    - name: Run tests
+      if: ${{ !github.event.inputs.skip_tests }}
+      run: |
+        echo "Running tests..."
+        uv run make test
+
+    - name: Build release packages
+      run: |
+        echo "Building release packages..."
+        if [ "${{ github.event.inputs.skip_tests }}" = "true" ]; then
+          uv run python scripts/build_release.py --skip-tests
+        else
+          uv run python scripts/build_release.py
+        fi
+
+    - name: Create GitHub Release
+      uses: softprops/action-gh-release@v1
+      with:
+        tag_name: v${{ env.NEW_VERSION }}
+        name: NIA Engineering Portal v${{ env.NEW_VERSION }}
+        body: |
+          ## What's New in v${{ env.NEW_VERSION }}
+
+          - Cross-platform tray application
+          - Web-based configuration interface
+          - Comprehensive testing framework
+          - Performance optimizations
+          - Accessibility improvements
+
+          ## Installation
+
+          1. Download the appropriate package for your platform
+          2. Extract the archive
+          3. Run the installer script: `./install-<platform>.sh`
+
+          ## System Requirements
+
+          - Python 3.12 or higher
+          - Modern web browser
+          - 50MB available disk space
+
+          ## Files
+
+          See the attached files for platform-specific packages.
+        files: |
+          dist/*.tar.gz
+          dist/*.sh
+          dist/RELEASE_NOTES.md
+        draft: false
+        prerelease: false
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Commit version bump
+      run: |
+        git add pyproject.toml VERSION
+        git commit -m "Bump version to v${{ env.NEW_VERSION }}"
+        git push origin main
+
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: release-packages-v${{ env.NEW_VERSION }}
+        path: dist/
+        retention-days: 30

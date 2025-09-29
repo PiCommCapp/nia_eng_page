@@ -3,17 +3,18 @@ GUI components for the NIA Engineering Portal tray application.
 Provides the configuration dialog and other user interface elements.
 """
 
-import tkinter as tk
-from tkinter import ttk, messagebox
-from typing import Optional, Callable
 import logging
+import webbrowser
+from collections.abc import Callable
+from pathlib import Path
 
 logger = logging.getLogger(__name__)
+
 
 class ConfigurationDialog:
     """Configuration dialog for the tray application."""
 
-    def __init__(self, config_manager, on_save: Optional[Callable] = None):
+    def __init__(self, config_manager, on_save: Callable | None = None):
         """Initialize configuration dialog.
 
         Args:
@@ -22,132 +23,304 @@ class ConfigurationDialog:
         """
         self.config_manager = config_manager
         self.on_save = on_save
-        self.dialog = None
-        self.port_var = None
-        self.page_var = None
 
     def show(self) -> None:
-        """Show the configuration dialog."""
-        if self.dialog and self.dialog.winfo_exists():
-            self.dialog.lift()
-            return
+        """Show the configuration dialog by opening a web page."""
+        logger.info("Opening configuration web page")
 
-        self.dialog = tk.Toplevel()
-        self.dialog.title("NIA Engineering Portal Configuration")
-        self.dialog.geometry("400x200")
-        self.dialog.resizable(False, False)
+        # Start a simple HTTP server to handle configuration updates
+        import http.server
+        import json
+        import socketserver
+        import threading
+        import time
 
-        # Center the dialog
-        self.dialog.transient()
-        self.dialog.grab_set()
+        # Capture variables for use in the handler
+        config_manager = self.config_manager
+        on_save = self.on_save
 
-        self._create_widgets()
-        self._load_current_config()
+        class ConfigHandler(http.server.SimpleHTTPRequestHandler):
+            def end_headers(self):
+                # Add CORS headers
+                self.send_header("Access-Control-Allow-Origin", "*")
+                self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+                self.send_header("Access-Control-Allow-Headers", "Content-Type")
+                super().end_headers()
 
-        # Center on screen
-        self.dialog.update_idletasks()
-        x = (self.dialog.winfo_screenwidth() // 2) - (400 // 2)
-        y = (self.dialog.winfo_screenheight() // 2) - (200 // 2)
-        self.dialog.geometry(f"400x200+{x}+{y}")
+            def do_OPTIONS(self):
+                # Handle preflight requests
+                self.send_response(200)
+                self.end_headers()
 
-    def _create_widgets(self) -> None:
-        """Create dialog widgets."""
-        # Main frame
-        main_frame = ttk.Frame(self.dialog, padding="20")
-        main_frame.grid(row=0, column=0, sticky=(tk.W, tk.E, tk.N, tk.S))
+            def do_POST(self):
+                if self.path == "/save_config":
+                    content_length = int(self.headers["Content-Length"])
+                    post_data = self.rfile.read(content_length)
+                    try:
+                        config_data = json.loads(post_data.decode("utf-8"))
 
-        # Port configuration
-        port_frame = ttk.LabelFrame(main_frame, text="Server Port", padding="10")
-        port_frame.grid(row=0, column=0, columnspan=2, sticky=(tk.W, tk.E), pady=(0, 10))
+                        # Update configuration
+                        config_manager.set_port(config_data["port"])
+                        config_manager.set_default_page(config_data["default_page"])
+                        config_manager.save_config()
 
-        ttk.Label(port_frame, text="Port:").grid(row=0, column=0, sticky=tk.W, padx=(0, 10))
+                        # Send success response
+                        self.send_response(200)
+                        self.send_header("Content-type", "application/json")
+                        self.end_headers()
+                        response = {
+                            "status": "success",
+                            "message": "Configuration saved successfully",
+                        }
+                        self.wfile.write(json.dumps(response).encode("utf-8"))
 
-        self.port_var = tk.StringVar()
-        port_entry = ttk.Entry(port_frame, textvariable=self.port_var, width=10)
-        port_entry.grid(row=0, column=1, sticky=tk.W, padx=(0, 10))
+                        # Call the callback if provided
+                        if on_save:
+                            on_save()
 
-        ttk.Button(port_frame, text="Test Port", command=self._test_port).grid(row=0, column=2, sticky=tk.W)
-
-        # Page selection
-        page_frame = ttk.LabelFrame(main_frame, text="Default Page", padding="10")
-        page_frame.grid(row=1, column=0, columnspan=2, sticky=(tk.W, tk.E), pady=(0, 20))
-
-        ttk.Label(page_frame, text="Page:").grid(row=0, column=0, sticky=tk.W, padx=(0, 10))
-
-        self.page_var = tk.StringVar()
-        page_combo = ttk.Combobox(page_frame, textvariable=self.page_var, width=30, state="readonly")
-        page_combo.grid(row=0, column=1, sticky=(tk.W, tk.E))
-
-        # Load available pages
-        available_pages = self.config_manager.get_available_pages()
-        page_combo['values'] = available_pages
-
-        # Buttons
-        button_frame = ttk.Frame(main_frame)
-        button_frame.grid(row=2, column=0, columnspan=2, sticky=(tk.W, tk.E))
-
-        ttk.Button(button_frame, text="Save", command=self._save_config).grid(row=0, column=0, padx=(0, 10))
-        ttk.Button(button_frame, text="Cancel", command=self._close_dialog).grid(row=0, column=1)
-
-        # Configure grid weights
-        main_frame.columnconfigure(0, weight=1)
-        page_frame.columnconfigure(1, weight=1)
-
-    def _load_current_config(self) -> None:
-        """Load current configuration into dialog."""
-        self.port_var.set(str(self.config_manager.get_port()))
-        self.page_var.set(self.config_manager.get_default_page())
-
-    def _test_port(self) -> None:
-        """Test if the configured port is available."""
-        try:
-            port = int(self.port_var.get())
-            if 1024 <= port <= 65535:
-                # Import here to avoid circular imports
-                from tray_app.server_controller import ServerController
-                controller = ServerController(self.config_manager)
-                if controller.is_port_available(port):
-                    messagebox.showinfo("Port Test", f"Port {port} is available")
+                    except Exception as e:
+                        # Send error response
+                        self.send_response(400)
+                        self.send_header("Content-type", "application/json")
+                        self.end_headers()
+                        response = {"status": "error", "message": str(e)}
+                        self.wfile.write(json.dumps(response).encode("utf-8"))
                 else:
-                    messagebox.showwarning("Port Test", f"Port {port} is not available")
-            else:
-                messagebox.showerror("Port Test", "Port must be between 1024 and 65535")
-        except ValueError:
-            messagebox.showerror("Port Test", "Please enter a valid port number")
+                    self.send_response(404)
+                    self.end_headers()
 
-    def _save_config(self) -> None:
-        """Save configuration."""
-        try:
-            # Validate port
-            port = int(self.port_var.get())
-            if not (1024 <= port <= 65535):
-                messagebox.showerror("Invalid Port", "Port must be between 1024 and 65535")
-                return
+        # Find an available port for the config server
+        config_port = 9092
+        while True:
+            try:
+                httpd = socketserver.TCPServer(("", config_port), ConfigHandler)
+                break
+            except OSError:
+                config_port += 1
 
-            # Validate page
-            page = self.page_var.get()
-            available_pages = self.config_manager.get_available_pages()
-            if page not in available_pages:
-                messagebox.showerror("Invalid Page", "Please select a valid page")
-                return
+        # Start the server in a separate thread
+        server_thread = threading.Thread(target=httpd.serve_forever)
+        server_thread.daemon = True
+        server_thread.start()
 
-            # Save configuration
-            self.config_manager.set_port(port)
-            self.config_manager.set_default_page(page)
+        # Give the server a moment to start
+        time.sleep(0.5)
 
-            if self.config_manager.save_config():
-                messagebox.showinfo("Configuration Saved", "Configuration saved successfully")
-                if self.on_save:
-                    self.on_save()
-                self._close_dialog()
-            else:
-                messagebox.showerror("Save Error", "Failed to save configuration")
+        # Create the configuration HTML with the server URL
+        config_html = self._create_config_html(config_port)
 
-        except ValueError:
-            messagebox.showerror("Invalid Input", "Please enter a valid port number")
+        # Write to a temporary file
+        config_file = Path(__file__).parent / "config.html"
+        with open(config_file, "w") as f:
+            f.write(config_html)
 
-    def _close_dialog(self) -> None:
-        """Close the dialog."""
-        if self.dialog:
-            self.dialog.destroy()
-            self.dialog = None
+        # Open in browser
+        webbrowser.open(f"file://{config_file.absolute()}")
+
+        # Show instructions
+        print("\n" + "=" * 60)
+        print("🔧 NIA Engineering Portal Configuration")
+        print("=" * 60)
+        print("A configuration page has opened in your browser.")
+        print("Make your changes and click 'Save Configuration' to apply them.")
+        print("The configuration will be saved automatically.")
+        print("=" * 60)
+
+        # Clean up after a delay (no user interaction required)
+        def cleanup_after_delay():
+            time.sleep(30)  # Give user time to configure
+            if config_file.exists():
+                config_file.unlink()
+            # Shutdown the server
+            try:
+                httpd.shutdown()
+            except Exception:
+                # Ignore shutdown errors during cleanup
+                pass
+
+        cleanup_thread = threading.Thread(target=cleanup_after_delay)
+        cleanup_thread.daemon = True
+        cleanup_thread.start()
+
+    def _create_config_html(self, config_port: int = 9092) -> str:
+        """Create HTML configuration page."""
+        current_port = self.config_manager.get_port()
+        current_page = self.config_manager.get_default_page()
+        available_pages = self.config_manager.get_available_pages()
+
+        page_options = ""
+        for page in available_pages:
+            selected = "selected" if page == current_page else ""
+            page_options += f'<option value="{page}" {selected}>{page}</option>'
+
+        return f"""
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NIA Engineering Portal - Configuration</title>
+    <style>
+        body {{
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }}
+        .container {{
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }}
+        h1 {{
+            color: #333;
+            margin-bottom: 30px;
+            text-align: center;
+        }}
+        .form-group {{
+            margin-bottom: 20px;
+        }}
+        label {{
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+            color: #555;
+        }}
+        input, select {{
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+        }}
+        button {{
+            background-color: #007bff;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-right: 10px;
+        }}
+        button:hover {{
+            background-color: #0056b3;
+        }}
+        .secondary {{
+            background-color: #6c757d;
+        }}
+        .secondary:hover {{
+            background-color: #545b62;
+        }}
+        .status {{
+            margin-top: 20px;
+            padding: 10px;
+            border-radius: 4px;
+            display: none;
+        }}
+        .success {{
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }}
+        .error {{
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 NIA Engineering Portal Configuration</h1>
+
+        <form id="configForm">
+            <div class="form-group">
+                <label for="port">Server Port:</label>
+                <input type="number" id="port" name="port" value="{current_port}" min="1024" max="65535" required>
+                <small>Port must be between 1024 and 65535</small>
+            </div>
+
+            <div class="form-group">
+                <label for="page">Default Page:</label>
+                <select id="page" name="page" required>
+                    {page_options}
+                </select>
+            </div>
+
+            <div class="form-group">
+                <button type="button" onclick="testPort()">Test Port</button>
+                <button type="submit">Save Configuration</button>
+                <button type="button" onclick="window.close()" class="secondary">Close</button>
+            </div>
+
+            <div id="status" class="status"></div>
+        </form>
+    </div>
+
+    <script>
+        function showStatus(message, type) {{
+            const status = document.getElementById('status');
+            status.textContent = message;
+            status.className = 'status ' + type;
+            status.style.display = 'block';
+            setTimeout(() => {{
+                status.style.display = 'none';
+            }}, 3000);
+        }}
+
+        function testPort() {{
+            const port = document.getElementById('port').value;
+            if (port < 1024 || port > 65535) {{
+                showStatus('Port must be between 1024 and 65535', 'error');
+                return;
+            }}
+            showStatus('Port test not available in web interface. Please test manually.', 'error');
+        }}
+
+        document.getElementById('configForm').addEventListener('submit', function(e) {{
+            e.preventDefault();
+
+            const port = parseInt(document.getElementById('port').value);
+            const page = document.getElementById('page').value;
+
+            if (port < 1024 || port > 65535) {{
+                showStatus('Port must be between 1024 and 65535', 'error');
+                return;
+            }}
+
+            // Save configuration via HTTP POST to the tray app
+            const configData = {{
+                port: port,
+                default_page: page
+            }};
+
+            fetch('http://localhost:{config_port}/save_config', {{
+                method: 'POST',
+                headers: {{
+                    'Content-Type': 'application/json',
+                }},
+                body: JSON.stringify(configData)
+            }})
+            .then(response => response.json())
+            .then(data => {{
+                if (data.status === 'success') {{
+                    showStatus('Configuration saved successfully! The tray application has been updated.', 'success');
+                    // Close the window after a short delay
+                    setTimeout(() => {{
+                        window.close();
+                    }}, 2000);
+                }} else {{
+                    showStatus('Error saving configuration: ' + data.message, 'error');
+                }}
+            }})
+            .catch(error => {{
+                showStatus('Error saving configuration: ' + error.message, 'error');
+            }});
+        }});
+    </script>
+</body>
+</html>
+"""

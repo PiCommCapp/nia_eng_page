@@ -1,10 +1,31 @@
 {
   "port": 9091,
-  "default_page": "index.html",
+  "default_page": "pages/plenary.html",
   "available_pages": [
     "index.html",
     "pages/plenary.html",
-    "pages/committees/index.html",
-    "pages/engineering/index.html"
+    "pages/plenary-operator.html",
+    "pages/plenary-engineer.html",
+    "pages/committees.html",
+    "pages/cr21.html",
+    "pages/cr21-operator.html",
+    "pages/cr21-engineer.html",
+    "pages/cr29.html",
+    "pages/cr29-operator.html",
+    "pages/cr29-engineer.html",
+    "pages/cr30.html",
+    "pages/cr30-operator.html",
+    "pages/cr30-engineer.html",
+    "pages/senate.html",
+    "pages/senate-operator.html",
+    "pages/senate-engineer.html",
+    "pages/engineering.html",
+    "pages/kvm.html",
+    "pages/network.html",
+    "pages/firewalls.html",
+    "pages/dante.html",
+    "pages/car2.html",
+    "pages/cta.html",
+    "pages/b23.html"
   ]
 }

@@ -32,6 +32,26 @@ help:
 	@echo "  make test-tray  - Test tray application components"
 	@echo "  make build-tray - Build executable for current platform"
 	@echo ""
+	@echo "Testing Commands:"
+	@echo "  make test       - Run all tests (unit, integration, e2e, performance, accessibility)"
+	@echo "  make test-unit  - Run unit tests only"
+	@echo "  make test-integration - Run integration tests only"
+	@echo "  make test-e2e   - Run end-to-end tests only"
+	@echo "  make test-performance - Run performance tests only"
+	@echo "  make test-accessibility - Run accessibility tests only"
+	@echo "  make test-coverage - Run all tests with coverage report"
+	@echo ""
+	@echo "Version Management Commands:"
+	@echo "  make version    - Get current version"
+	@echo "  make version-bump TYPE=<patch|minor|major> - Bump version"
+	@echo "  make version-set VERSION=<x.y.z> - Set specific version"
+	@echo "  make version-info - Show detailed version information"
+	@echo ""
+	@echo "Release Commands:"
+	@echo "  make release-build - Build release packages (with tests)"
+	@echo "  make release-build-fast - Build release packages (skip tests)"
+	@echo "  make release-clean - Clean release artifacts"
+	@echo ""
 
 # Start the development server
 serve:
@@ -53,6 +73,10 @@ serve-port:
 kill:
 	@echo "🛑 Stopping NIA Engineering Portal server instances..."
 	@echo "  • Killing processes on port $(PORT)..."
+	@$(MAKE) kill-unix || $(MAKE) kill-windows
+
+# Unix/Linux/macOS kill command
+kill-unix:
 	@if lsof -ti:$(PORT) > /dev/null 2>&1; then \
 		echo "  • Found process on port $(PORT)"; \
 		lsof -ti:$(PORT) | xargs kill -9 2>/dev/null || true; \
@@ -62,15 +86,32 @@ kill:
 	fi
 	@echo "✅ Kill command completed!"
 
+# Windows kill command
+kill-windows:
+	@for /f "tokens=5" %%a in ('netstat -ano ^| findstr :$(PORT)') do ( \
+		echo "  • Found process %%a on port $(PORT)"; \
+		taskkill /PID %%a /F >nul 2>&1 || echo "  • Process %%a already stopped"; \
+	)
+	@echo "✅ Kill command completed!"
+
 # Install Python dependencies
 install:
 	@echo "📦 Checking UV installation..."
-	@which uv > /dev/null || (echo "❌ UV not found. Please install UV first:" && echo "   curl -LsSf https://astral.sh/uv/install.sh | sh" && exit 1)
-	@echo "✅ UV found at $$(which uv)"
+	@$(MAKE) check-uv-unix || $(MAKE) check-uv-windows
 	@echo "🔧 Creating virtual environment and installing dependencies..."
 	uv venv
 	uv sync
 	@echo "✅ Installation complete!"
+
+# Check UV on Unix/Linux/macOS
+check-uv-unix:
+	@which uv > /dev/null || (echo "❌ UV not found. Please install UV first:" && echo "   curl -LsSf https://astral.sh/uv/install.sh | sh" && exit 1)
+	@echo "✅ UV found at $$(which uv)"
+
+# Check UV on Windows
+check-uv-windows:
+	@where uv >nul 2>&1 || (echo "❌ UV not found. Please install UV first:" && echo "   powershell -c \"irm https://astral.sh/uv/install.ps1 | iex\"" && exit 1)
+	@echo "✅ UV found at $$(where uv)"
 
 # Update dependencies
 update:
@@ -83,16 +124,41 @@ status:
 	@echo "📊 NIA Engineering Portal - Project Status"
 	@echo ""
 	@echo "🔧 Environment:"
+	@$(MAKE) status-env-unix || $(MAKE) status-env-windows
+	@echo ""
+	@echo "📁 Project Structure:"
+	@$(MAKE) status-structure-unix || $(MAKE) status-structure-windows
+	@echo ""
+	@echo "📦 Dependencies:"
+	@$(MAKE) status-deps-unix || $(MAKE) status-deps-windows
+	@echo ""
+
+# Environment status for Unix/Linux/macOS
+status-env-unix:
 	@echo "  • Python: $$(python3 --version 2>/dev/null || echo 'Not found')"
 	@echo "  • UV: $$(uv --version 2>/dev/null || echo 'Not found')"
 	@echo "  • Virtual Environment: $$(if [ -d .venv ]; then echo '✅ Created'; else echo '❌ Not created'; fi)"
-	@echo ""
-	@echo "📁 Project Structure:"
+
+# Environment status for Windows
+status-env-windows:
+	@echo "  • Python: $$(python --version 2>nul || echo 'Not found')"
+	@echo "  • UV: $$(uv --version 2>nul || echo 'Not found')"
+	@echo "  • Virtual Environment: $$(if exist .venv (echo '✅ Created') else (echo '❌ Not created'))"
+
+# Project structure status for Unix/Linux/macOS
+status-structure-unix:
 	@echo "  • Pages Directory: $$(if [ -d pages ]; then echo '✅ Exists'; else echo '❌ Missing'; fi)"
 	@echo "  • Scripts Directory: $$(if [ -d scripts ]; then echo '✅ Exists'; else echo '❌ Missing'; fi)"
 	@echo "  • Documentation: $$(if [ -d docs ]; then echo '✅ Exists'; else echo '❌ Missing'; fi)"
-	@echo ""
-	@echo "📦 Dependencies:"
+
+# Project structure status for Windows
+status-structure-windows:
+	@echo "  • Pages Directory: $$(if exist pages (echo '✅ Exists') else (echo '❌ Missing'))"
+	@echo "  • Scripts Directory: $$(if exist scripts (echo '✅ Exists') else (echo '❌ Missing'))"
+	@echo "  • Documentation: $$(if exist docs (echo '✅ Exists') else (echo '❌ Missing'))"
+
+# Dependencies status for Unix/Linux/macOS
+status-deps-unix:
 	@if [ -f pyproject.toml ]; then \
 		echo "  • Project Config: ✅ pyproject.toml found"; \
 		if [ -d .venv ]; then \
@@ -103,19 +169,43 @@ status:
 	else \
 		echo "  • Project Config: ❌ pyproject.toml not found"; \
 	fi
-	@echo ""
+
+# Dependencies status for Windows
+status-deps-windows:
+	@if exist pyproject.toml ( \
+		echo "  • Project Config: ✅ pyproject.toml found" && \
+		if exist .venv ( \
+			for /f %%i in ('uv pip list --format=freeze ^| find /c /v ""') do echo "  • Dependencies: %%i packages installed" \
+		) else ( \
+			echo "  • Dependencies: ❌ Virtual environment not created" \
+		) \
+	) else ( \
+		echo "  • Project Config: ❌ pyproject.toml not found" \
+	)
 
 # Clean up temporary files
 clean:
 	@echo "🧹 Cleaning up temporary files..."
 	@echo "  • Removing Python cache files..."
-	@find . -type f -name "*.pyc" -delete 2>/dev/null || true
-	@find . -type d -name "__pycache__" -delete 2>/dev/null || true
-	@echo "  • Removing system files..."
-	@echo "  • Removing build artifacts..."
-	@rm -rf build/ dist/ *.spec
+	@$(MAKE) clean-unix || $(MAKE) clean-windows
 	@echo "✅ Cleanup complete"
 	@echo ""
+
+# Clean for Unix/Linux/macOS
+clean-unix:
+	@find . -type f -name "*.pyc" -delete 2>/dev/null || true
+	@find . -type d -name "__pycache__" -delete 2>/dev/null || true
+	@echo "  • Removing build artifacts..."
+	@rm -rf build/ dist/ *.spec
+
+# Clean for Windows
+clean-windows:
+	@for /r . %%i in (*.pyc) do del "%%i" 2>nul || true
+	@for /d /r . %%i in (__pycache__) do rmdir /s /q "%%i" 2>nul || true
+	@echo "  • Removing build artifacts..."
+	@if exist build rmdir /s /q build
+	@if exist dist rmdir /s /q dist
+	@del *.spec 2>nul || true
 
 # Tray Application Commands
 
@@ -146,6 +236,159 @@ build-tray:
 	@uv run python scripts/build_tray.py
 	@echo "✅ Build complete"
 	@echo "  • Executable location: dist/$$(uname -s | tr '[:upper:]' '[:lower:]')/"
+	@echo ""
+
+# Testing Commands
+
+# Run all tests
+test:
+	@echo "🧪 Running all tests..."
+	@echo "  • Unit tests..."
+	@$(MAKE) test-unit
+	@echo "  • Integration tests..."
+	@$(MAKE) test-integration
+	@echo "  • End-to-end tests..."
+	@$(MAKE) test-e2e
+	@echo "  • Performance tests..."
+	@$(MAKE) test-performance
+	@echo "  • Accessibility tests..."
+	@$(MAKE) test-accessibility
+	@echo "✅ All tests complete"
+	@echo ""
+
+# Run unit tests
+test-unit:
+	@echo "🔬 Running unit tests..."
+	@if [ -d .venv ]; then \
+		uv run python tests/run_tests.py unit; \
+	else \
+		echo "❌ Virtual environment not found. Run 'make install' first."; \
+		exit 1; \
+	fi
+	@echo "✅ Unit tests complete"
+	@echo ""
+
+# Run integration tests
+test-integration:
+	@echo "🔗 Running integration tests..."
+	@if [ -d .venv ]; then \
+		uv run python tests/run_tests.py integration; \
+	else \
+		echo "❌ Virtual environment not found. Run 'make install' first."; \
+		exit 1; \
+	fi
+	@echo "✅ Integration tests complete"
+	@echo ""
+
+# Run end-to-end tests
+test-e2e:
+	@echo "🌐 Running end-to-end tests..."
+	@if [ -d .venv ]; then \
+		uv run python tests/run_tests.py e2e; \
+	else \
+		echo "❌ Virtual environment not found. Run 'make install' first."; \
+		exit 1; \
+	fi
+	@echo "✅ End-to-end tests complete"
+	@echo ""
+
+# Run performance tests
+test-performance:
+	@echo "⚡ Running performance tests..."
+	@if [ -d .venv ]; then \
+		uv run python tests/run_tests.py performance; \
+	else \
+		echo "❌ Virtual environment not found. Run 'make install' first."; \
+		exit 1; \
+	fi
+	@echo "✅ Performance tests complete"
+	@echo ""
+
+# Run accessibility tests
+test-accessibility:
+	@echo "♿ Running accessibility tests..."
+	@if [ -d .venv ]; then \
+		uv run python tests/run_tests.py accessibility; \
+	else \
+		echo "❌ Virtual environment not found. Run 'make install' first."; \
+		exit 1; \
+	fi
+	@echo "✅ Accessibility tests complete"
+	@echo ""
+
+# Run tests with coverage
+test-coverage:
+	@echo "📊 Running tests with coverage..."
+	@if [ -d .venv ]; then \
+		uv run python tests/run_tests.py all --verbose; \
+	else \
+		echo "❌ Virtual environment not found. Run 'make install' first."; \
+		exit 1; \
+	fi
+	@echo "✅ Coverage report generated"
+	@echo ""
+
+# Version Management Commands
+
+# Get current version
+version:
+	@echo "📋 Current version:"
+	@uv run python scripts/version.py get
+
+# Bump version (patch, minor, major)
+version-bump:
+	@if [ -z "$(TYPE)" ]; then \
+		echo "❌ Please specify version type: make version-bump TYPE=patch|minor|major"; \
+		exit 1; \
+	fi
+	@echo "🔄 Bumping $(TYPE) version..."
+	@uv run python scripts/version.py bump $(TYPE)
+
+# Set specific version
+version-set:
+	@if [ -z "$(VERSION)" ]; then \
+		echo "❌ Please specify version: make version-set VERSION=1.2.3"; \
+		exit 1; \
+	fi
+	@echo "🔧 Setting version to $(VERSION)..."
+	@uv run python scripts/version.py set $(VERSION)
+
+# Show version info
+version-info:
+	@echo "📋 Version information:"
+	@uv run python scripts/version.py info
+
+# Release Commands
+
+# Build release packages
+release-build:
+	@echo "🚀 Building release packages..."
+	@if [ -d .venv ]; then \
+		uv run python scripts/build_release.py; \
+	else \
+		echo "❌ Virtual environment not found. Run 'make install' first."; \
+		exit 1; \
+	fi
+	@echo "✅ Release build complete"
+	@echo ""
+
+# Build release packages (skip tests)
+release-build-fast:
+	@echo "🚀 Building release packages (skipping tests)..."
+	@if [ -d .venv ]; then \
+		uv run python scripts/build_release.py --skip-tests; \
+	else \
+		echo "❌ Virtual environment not found. Run 'make install' first."; \
+		exit 1; \
+	fi
+	@echo "✅ Release build complete"
+	@echo ""
+
+# Clean release artifacts
+release-clean:
+	@echo "🧹 Cleaning release artifacts..."
+	@rm -rf dist/ build/
+	@echo "✅ Release artifacts cleaned"
 	@echo ""
 
 # Code Quality Commands
