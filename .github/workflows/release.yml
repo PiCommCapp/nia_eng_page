@@ -68,7 +68,8 @@ jobs:
       if: matrix.os != 'ubuntu-latest' && !github.event.inputs.skip_tests
       run: uv run make test
 
-    - name: Build executable
+    - name: Build executable (Ubuntu/macOS)
+      if: matrix.os != 'windows-latest'
       run: |
         echo "Building for ${{ matrix.platform }} (${{ matrix.arch }})"
 
@@ -90,11 +91,28 @@ jobs:
 
         # Create archive
         cd dist
-        if [ "${{ matrix.platform }}" = "windows" ]; then
-          zip -r ${{ matrix.platform }}-${{ matrix.arch }}.zip ${{ matrix.platform }}-${{ matrix.arch }}/
-        else
-          tar -czf ${{ matrix.platform }}-${{ matrix.arch }}.tar.gz ${{ matrix.platform }}-${{ matrix.arch }}/
-        fi
+        tar -czf ${{ matrix.platform }}-${{ matrix.arch }}.tar.gz ${{ matrix.platform }}-${{ matrix.arch }}/
+        cd ..
+
+    - name: Build executable (Windows)
+      if: matrix.os == 'windows-latest'
+      shell: cmd
+      run: |
+        echo Building for windows (x64)
+
+        rem Create output directory
+        if not exist "dist\windows-x64" mkdir "dist\windows-x64"
+
+        rem Build with PyInstaller
+        uv run pyinstaller --clean --distpath dist\windows-x64 tray_app.spec
+
+        rem Verify build
+        echo Build contents:
+        dir "dist\windows-x64" /B
+
+        rem Create archive
+        cd dist
+        powershell -Command "Compress-Archive -Path 'windows-x64' -DestinationPath 'windows-x64.zip' -Force"
         cd ..
 
     - name: Upload build artifacts
