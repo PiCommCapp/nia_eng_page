@@ -90,15 +90,14 @@ jobs:
         echo "Building executable for ${{ matrix.os }}..."
         uv run python scripts/build_tray.py
 
-    - name: Create release package
+    - name: Create release package (Ubuntu/macOS)
+      if: matrix.os != 'windows-latest'
       run: |
         echo "Creating release package for ${{ matrix.os }}..."
         # Create platform-specific directory
         PLATFORM_NAME=""
         if [ "${{ matrix.os }}" = "ubuntu-latest" ]; then
           PLATFORM_NAME="linux"
-        elif [ "${{ matrix.os }}" = "windows-latest" ]; then
-          PLATFORM_NAME="windows"
         elif [ "${{ matrix.os }}" = "macos-latest" ]; then
           PLATFORM_NAME="macos"
         fi
@@ -120,6 +119,29 @@ jobs:
         # List what we have
         echo "Release package contents:"
         find dist/$PLATFORM_NAME -type f | head -10
+
+    - name: Create release package (Windows)
+      if: matrix.os == 'windows-latest'
+      shell: cmd
+      run: |
+        echo Creating release package for windows-latest...
+        set PLATFORM_NAME=windows
+
+        rem Create final package directory
+        if not exist "dist\%PLATFORM_NAME%" mkdir "dist\%PLATFORM_NAME%"
+
+        rem Copy built files to platform directory
+        if exist "dist\%PLATFORM_NAME%" (
+          echo Found platform-specific build directory
+        ) else (
+          echo Moving files to platform directory
+          if not exist "dist\%PLATFORM_NAME%" mkdir "dist\%PLATFORM_NAME%"
+          xcopy "dist\*" "dist\%PLATFORM_NAME%\" /E /I /Q
+        )
+
+        rem List what we have
+        echo Release package contents:
+        dir "dist\%PLATFORM_NAME%" /B
 
     - name: Upload build artifacts
       uses: actions/upload-artifact@v4
