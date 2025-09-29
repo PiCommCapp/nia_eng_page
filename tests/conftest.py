@@ -2,12 +2,17 @@
 Pytest configuration and shared fixtures for the NIA Engineering Portal test suite.
 """
 
+import os
 import shutil
 import tempfile
 from collections.abc import Generator
 from pathlib import Path
 
 import pytest
+
+# Set up environment for headless testing
+if "DISPLAY" not in os.environ or not os.environ["DISPLAY"]:
+    os.environ["DISPLAY"] = ":99"
 
 from tray_app.config_manager import ConfigManager
 from tray_app.server_controller import ServerController

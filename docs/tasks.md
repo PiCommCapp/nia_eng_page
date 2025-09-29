@@ -58,6 +58,13 @@ The NIA Engineering Portal is now **production-ready** with all core features im
 
 ### Latest Fixes
 
+- **CI/CD Pipeline Fixes**: Resolved GitHub Actions workflow issues and improved build automation
+  - Fixed deprecated `actions/upload-artifact@v3` to `@v4` across all workflows
+  - Updated build-matrix workflow to manual trigger only (no more push/PR triggers)
+  - Added configurable platform selection and optional test skipping for faster builds
+  - Resolved headless environment issues with pystray library in CI
+  - Added virtual display setup for Linux runners to handle GUI components
+  - Improved workflow reliability and reduced unnecessary builds
 - **Code Linting and Quality Improvements**: Resolved all Python linting errors, improved code quality, and established consistent coding standards across the project
   - Fixed bare except clauses and improved error handling
   - Resolved import order issues with proper noqa comments

@@ -4,9 +4,30 @@ Provides system tray integration with icon, menu, and status indication.
 """
 
 import logging
+import os
+from unittest.mock import MagicMock
 
-import pystray
-from PIL import Image, ImageDraw
+try:
+    import pystray
+    from PIL import Image, ImageDraw
+
+    PYSRAY_AVAILABLE = True
+except (ImportError, OSError):
+    # Handle headless environments or missing dependencies
+    if "DISPLAY" not in os.environ or not os.environ["DISPLAY"]:
+        # Mock pystray for headless testing
+        pystray = MagicMock()
+        pystray.Icon = MagicMock()
+        pystray.Menu = MagicMock()
+        pystray.MenuItem = MagicMock()
+        pystray.Menu.SEPARATOR = "---"
+
+        # Mock PIL for headless testing
+        Image = MagicMock()
+        ImageDraw = MagicMock()
+        PYSRAY_AVAILABLE = False
+    else:
+        raise
 
 logger = logging.getLogger(__name__)
 
@@ -34,6 +55,15 @@ class TrayApplication:
 
     def _create_tray_icon(self) -> None:
         """Create the system tray icon."""
+        if not PYSRAY_AVAILABLE:
+            # In headless environments, create mock icons
+            self.icon_images = {
+                "stopped": MagicMock(),
+                "running": MagicMock(),
+                "error": MagicMock(),
+            }
+            return
+
         # Create icon images for different states
         self.icon_images = {
             "stopped": self._create_icon_image("red"),
@@ -61,6 +91,9 @@ class TrayApplication:
         Returns:
             PIL Image object
         """
+        if not PYSRAY_AVAILABLE:
+            # Return mock image for headless environments
+            return MagicMock()
         # Create a simple "www" icon
         size = 64
         image = Image.new("RGBA", (size, size), (0, 0, 0, 0))
@@ -208,6 +241,11 @@ class TrayApplication:
 
     def run(self) -> None:
         """Run the tray application."""
+        if not PYSRAY_AVAILABLE:
+            logger.info("Running in headless mode - tray icon not available")
+            self.is_running = True
+            return
+
         if self.icon:
             self.is_running = True
             logger.info("Starting tray application")
@@ -218,5 +256,9 @@ class TrayApplication:
     def stop(self) -> None:
         """Stop the tray application."""
         self.is_running = False
+        if not PYSRAY_AVAILABLE:
+            logger.info("Stopping headless mode")
+            return
+
         if self.icon:
             self.icon.stop()
