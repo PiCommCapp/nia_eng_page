@@ -93,6 +93,8 @@ The NIA Engineering Portal is now **production-ready** with all core features im
   - Enhanced release file preparation with better debugging and error handling
   - Fixed build_tray.py to use PyInstaller --distpath option for direct platform output
   - Simplified workflow by eliminating unnecessary file movement steps
+  - Added comprehensive debugging to build process and artifact handling
+  - Enhanced error reporting and file discovery in release workflow
 - **Code Linting and Quality Improvements**: Resolved all Python linting errors, improved code quality, and established consistent coding standards across the project
   - Fixed bare except clauses and improved error handling
   - Resolved import order issues with proper noqa comments

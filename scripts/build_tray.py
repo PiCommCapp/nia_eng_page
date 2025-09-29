@@ -14,10 +14,15 @@ def run_command(cmd, cwd=None):
     """Run a command and return the result."""
     print(f"Running: {' '.join(cmd)}")
     result = subprocess.run(cmd, cwd=cwd, capture_output=True, text=True)
+    print(f"Return code: {result.returncode}")
+    if result.stdout:
+        print(f"STDOUT: {result.stdout}")
+    if result.stderr:
+        print(f"STDERR: {result.stderr}")
     if result.returncode != 0:
-        print(f"Error: {result.stderr}")
+        print(f"Error: Command failed with return code {result.returncode}")
         return False
-    print(f"Success: {result.stdout}")
+    print("Success: Command completed successfully")
     return True
 
 
@@ -28,6 +33,7 @@ def build_linux():
     # Create dist directory
     dist_dir = Path("dist/linux")
     dist_dir.mkdir(parents=True, exist_ok=True)
+    print(f"Created dist directory: {dist_dir.absolute()}")
 
     # Build with PyInstaller
     cmd = [
@@ -40,7 +46,18 @@ def build_linux():
         "tray_app.spec",
     ]
 
-    return run_command(cmd)
+    success = run_command(cmd)
+
+    # Check what was created
+    if dist_dir.exists():
+        print(f"Dist directory exists: {dist_dir.absolute()}")
+        print("Contents:")
+        for item in dist_dir.iterdir():
+            print(f"  {item.name} ({'dir' if item.is_dir() else 'file'})")
+    else:
+        print("ERROR: Dist directory was not created!")
+
+    return success
 
 
 def build_windows():
@@ -50,6 +67,7 @@ def build_windows():
     # Create dist directory
     dist_dir = Path("dist/windows")
     dist_dir.mkdir(parents=True, exist_ok=True)
+    print(f"Created dist directory: {dist_dir.absolute()}")
 
     # Build with PyInstaller
     cmd = [
@@ -62,7 +80,18 @@ def build_windows():
         "tray_app.spec",
     ]
 
-    return run_command(cmd)
+    success = run_command(cmd)
+
+    # Check what was created
+    if dist_dir.exists():
+        print(f"Dist directory exists: {dist_dir.absolute()}")
+        print("Contents:")
+        for item in dist_dir.iterdir():
+            print(f"  {item.name} ({'dir' if item.is_dir() else 'file'})")
+    else:
+        print("ERROR: Dist directory was not created!")
+
+    return success
 
 
 def build_macos():
@@ -72,6 +101,7 @@ def build_macos():
     # Create dist directory
     dist_dir = Path("dist/macos")
     dist_dir.mkdir(parents=True, exist_ok=True)
+    print(f"Created dist directory: {dist_dir.absolute()}")
 
     # Build with PyInstaller
     cmd = [
@@ -84,7 +114,18 @@ def build_macos():
         "tray_app.spec",
     ]
 
-    return run_command(cmd)
+    success = run_command(cmd)
+
+    # Check what was created
+    if dist_dir.exists():
+        print(f"Dist directory exists: {dist_dir.absolute()}")
+        print("Contents:")
+        for item in dist_dir.iterdir():
+            print(f"  {item.name} ({'dir' if item.is_dir() else 'file'})")
+    else:
+        print("ERROR: Dist directory was not created!")
+
+    return success
 
 
 def main():
