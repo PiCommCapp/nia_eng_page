@@ -41,14 +41,16 @@ jobs:
       with:
         python-version: '3.12'
 
-    - name: Install UV
+    - name: Install UV (Windows)
+      if: matrix.os == 'windows-latest'
       run: |
-        if [ "${{ matrix.os }}" = "windows-latest" ]; then
-          powershell -c "irm https://astral.sh/uv/install.ps1 | iex"
-        else
-          curl -LsSf https://astral.sh/uv/install.sh | sh
-          echo "$HOME/.cargo/bin" >> $GITHUB_PATH
-        fi
+        powershell -c "irm https://astral.sh/uv/install.ps1 | iex"
+
+    - name: Install UV (Unix)
+      if: matrix.os != 'windows-latest'
+      run: |
+        curl -LsSf https://astral.sh/uv/install.sh | sh
+        echo "$HOME/.cargo/bin" >> $GITHUB_PATH
 
     - name: Install dependencies
       run: |
@@ -77,21 +79,30 @@ jobs:
         echo "NEW_VERSION=$NEW_VERSION" >> $GITHUB_ENV
         echo "New version: $NEW_VERSION"
 
-    - name: Run tests
-      if: ${{ !github.event.inputs.skip_tests }}
+    - name: Run tests (Ubuntu)
+      if: ${{ !github.event.inputs.skip_tests && matrix.os == 'ubuntu-latest' }}
       run: |
-        echo "Running tests..."
-        if [ "${{ matrix.os }}" = "ubuntu-latest" ]; then
-          export DISPLAY=:99
-        fi
+        echo "Running tests on Ubuntu..."
+        export DISPLAY=:99
         uv run make test
 
-    - name: Build executable
+    - name: Run tests (Windows/macOS)
+      if: ${{ !github.event.inputs.skip_tests && matrix.os != 'ubuntu-latest' }}
+      run: |
+        echo "Running tests on ${{ matrix.os }}..."
+        uv run make test
+
+    - name: Build executable (Ubuntu)
+      if: matrix.os == 'ubuntu-latest'
+      run: |
+        echo "Building executable for Ubuntu..."
+        export DISPLAY=:99
+        uv run python scripts/build_tray.py
+
+    - name: Build executable (Windows/macOS)
+      if: matrix.os != 'ubuntu-latest'
       run: |
         echo "Building executable for ${{ matrix.os }}..."
-        if [ "${{ matrix.os }}" = "ubuntu-latest" ]; then
-          export DISPLAY=:99
-        fi
         uv run python scripts/build_tray.py
 
     - name: Upload build artifacts

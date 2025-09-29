@@ -77,6 +77,8 @@ The NIA Engineering Portal is now **production-ready** with all core features im
   - Simplified GitHub workflows by consolidating build-matrix into release workflow
   - Created single release workflow that builds for all platforms and creates GitHub release
   - Eliminated confusing dual-workflow setup for cleaner CI/CD process
+  - Fixed Windows PowerShell compatibility issues in release workflow
+  - Separated platform-specific steps to avoid shell syntax conflicts
 - **Code Linting and Quality Improvements**: Resolved all Python linting errors, improved code quality, and established consistent coding standards across the project
   - Fixed bare except clauses and improved error handling
   - Resolved import order issues with proper noqa comments
