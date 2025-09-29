@@ -1,0 +1,15 @@
+{
+	"folders": [
+		{
+			"path": ".."
+		}
+	],
+	"settings": {
+		"liveServer.settings.donotShowInfoMsg": true,
+		"liveServer.settings.donotVerifyTags": true,
+		"liveServer.settings.port": 5500,
+		"ruff.enable": true,
+		"ruff.organizeImports": true,
+		"ruff.fixAll": true
+	}
+}
