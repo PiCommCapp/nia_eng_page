@@ -127,6 +127,11 @@ jobs:
       run: |
         uv sync
 
+    - name: Configure Git
+      run: |
+        git config --global user.name "GitHub Actions"
+        git config --global user.email "actions@github.com"
+
     - name: Bump version
       run: |
         echo "Bumping ${{ github.event.inputs.version_type }} version..."
