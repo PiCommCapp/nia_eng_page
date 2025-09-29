@@ -84,30 +84,30 @@ jobs:
         export DISPLAY=:99
         uv run python scripts/build_tray.py
 
-        # Move PyInstaller output to platform directory
-        if [ -d "dist" ]; then
-          echo "Moving PyInstaller output to platform directory..."
-          mkdir -p dist/linux
-          mv dist/nia-engineering-portal dist/linux/ || true
-          mv dist/* dist/linux/ 2>/dev/null || true
+        # Verify the build output
+        if [ -d "dist/linux" ]; then
+          echo "Linux build completed successfully"
+          echo "Contents of dist/linux:"
+          ls -la dist/linux/
+        else
+          echo "ERROR: dist/linux directory not found"
+          exit 1
         fi
 
-    - name: Build executable (Windows/macOS)
-      if: matrix.os != 'windows-latest'
+    - name: Build executable (macOS)
+      if: matrix.os == 'macos-latest'
       run: |
-        echo "Building executable for ${{ matrix.os }}..."
+        echo "Building executable for macOS..."
         uv run python scripts/build_tray.py
 
-        # Move PyInstaller output to platform directory
-        if [ -d "dist" ]; then
-          echo "Moving PyInstaller output to platform directory..."
-          PLATFORM_NAME=""
-          if [ "${{ matrix.os }}" = "macos-latest" ]; then
-            PLATFORM_NAME="macos"
-          fi
-          mkdir -p dist/$PLATFORM_NAME
-          mv dist/nia-engineering-portal dist/$PLATFORM_NAME/ || true
-          mv dist/* dist/$PLATFORM_NAME/ 2>/dev/null || true
+        # Verify the build output
+        if [ -d "dist/macos" ]; then
+          echo "macOS build completed successfully"
+          echo "Contents of dist/macos:"
+          ls -la dist/macos/
+        else
+          echo "ERROR: dist/macos directory not found"
+          exit 1
         fi
 
     - name: Build executable (Windows)
@@ -117,16 +117,14 @@ jobs:
         echo Building executable for windows-latest...
         uv run python scripts/build_tray.py
 
-        rem Move PyInstaller output to platform directory
-        if exist "dist" (
-          echo Moving PyInstaller output to platform directory...
-          if not exist "dist\windows" mkdir "dist\windows"
-          move "dist\nia-engineering-portal" "dist\windows\" 2>nul || echo No executable found
-          for /d %%d in (dist\*) do (
-            if not "%%d"=="dist\windows" (
-              move "%%d" "dist\windows\" 2>nul || echo No subdirectories to move
-            )
-          )
+        rem Verify the build output
+        if exist "dist\windows" (
+          echo Windows build completed successfully
+          echo Contents of dist\windows:
+          dir "dist\windows" /B
+        ) else (
+          echo ERROR: dist\windows directory not found
+          exit 1
         )
 
     - name: List build artifacts

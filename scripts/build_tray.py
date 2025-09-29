@@ -30,7 +30,15 @@ def build_linux():
     dist_dir.mkdir(parents=True, exist_ok=True)
 
     # Build with PyInstaller
-    cmd = ["uv", "run", "pyinstaller", "--clean", "tray_app.spec"]
+    cmd = [
+        "uv",
+        "run",
+        "pyinstaller",
+        "--clean",
+        "--distpath",
+        "dist/linux",
+        "tray_app.spec",
+    ]
 
     return run_command(cmd)
 
@@ -44,7 +52,15 @@ def build_windows():
     dist_dir.mkdir(parents=True, exist_ok=True)
 
     # Build with PyInstaller
-    cmd = ["uv", "run", "pyinstaller", "--clean", "tray_app.spec"]
+    cmd = [
+        "uv",
+        "run",
+        "pyinstaller",
+        "--clean",
+        "--distpath",
+        "dist/windows",
+        "tray_app.spec",
+    ]
 
     return run_command(cmd)
 
@@ -58,7 +74,15 @@ def build_macos():
     dist_dir.mkdir(parents=True, exist_ok=True)
 
     # Build with PyInstaller
-    cmd = ["uv", "run", "pyinstaller", "--clean", "tray_app.spec"]
+    cmd = [
+        "uv",
+        "run",
+        "pyinstaller",
+        "--clean",
+        "--distpath",
+        "dist/macos",
+        "tray_app.spec",
+    ]
 
     return run_command(cmd)
 
