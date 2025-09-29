@@ -78,10 +78,10 @@ jobs:
         # Build with PyInstaller
         if [ "${{ matrix.platform }}" = "macos" ] && [ "${{ matrix.arch }}" = "arm64" ]; then
           # Build ARM64 version on macOS
-          arch -arm64 uv run pyinstaller --clean --distpath dist/${{ matrix.platform }}-${{ matrix.arch }} --name nia-engineering-portal tray_app.spec
+          arch -arm64 uv run pyinstaller --clean --distpath dist/${{ matrix.platform }}-${{ matrix.arch }} tray_app.spec
         else
           # Build regular version
-          uv run pyinstaller --clean --distpath dist/${{ matrix.platform }}-${{ matrix.arch }} --name nia-engineering-portal tray_app.spec
+          uv run pyinstaller --clean --distpath dist/${{ matrix.platform }}-${{ matrix.arch }} tray_app.spec
         fi
 
         # Verify build
