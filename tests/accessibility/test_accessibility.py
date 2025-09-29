@@ -24,18 +24,18 @@ class TestAccessibility:
             assert soup.find("html") is not None, f"Missing <html> tag in {html_file}"
             # For test files, we'll be more lenient about head tag
             if "tmp" not in str(html_file):  # Only check real files, not test files
-                assert soup.find("head") is not None, (
-                    f"Missing <head> tag in {html_file}"
-                )
+                assert (
+                    soup.find("head") is not None
+                ), f"Missing <head> tag in {html_file}"
             assert soup.find("body") is not None, f"Missing <body> tag in {html_file}"
 
             # Check for language attribute
             html_tag = soup.find("html")
             if html_tag and html_tag.get("lang"):
                 lang = html_tag.get("lang")
-                assert len(lang) >= 2, (
-                    f"Invalid language attribute '{lang}' in {html_file}"
-                )
+                assert (
+                    len(lang) >= 2
+                ), f"Invalid language attribute '{lang}' in {html_file}"
 
     def test_heading_hierarchy(self, sample_html_files):
         """Test heading hierarchy for accessibility."""
@@ -83,12 +83,12 @@ class TestAccessibility:
             images = soup.find_all("img")
             for img in images:
                 alt_text = img.get("alt")
-                assert alt_text is not None, (
-                    f"Image missing alt attribute in {html_file}"
-                )
-                assert alt_text.strip() != "", (
-                    f"Image has empty alt attribute in {html_file}"
-                )
+                assert (
+                    alt_text is not None
+                ), f"Image missing alt attribute in {html_file}"
+                assert (
+                    alt_text.strip() != ""
+                ), f"Image has empty alt attribute in {html_file}"
 
     def test_link_accessibility(self, sample_html_files):
         """Test link accessibility."""
@@ -110,9 +110,9 @@ class TestAccessibility:
                     continue
 
                 # Link text should not be empty
-                assert link_text != "", (
-                    f"Link with empty text in {html_file}: {link.get('href')}"
-                )
+                assert (
+                    link_text != ""
+                ), f"Link with empty text in {html_file}: {link.get('href')}"
 
                 # Link text should be meaningful (not just "click here")
                 assert link_text.lower() not in [
@@ -142,9 +142,9 @@ class TestAccessibility:
                     if input_id:
                         # Should have associated label
                         label = form.find("label", {"for": input_id})
-                        assert label is not None, (
-                            f"Input {input_id} missing label in {html_file}"
-                        )
+                        assert (
+                            label is not None
+                        ), f"Input {input_id} missing label in {html_file}"
                     else:
                         # Should have label wrapping the input
                         label = input_elem.find_parent("label")
@@ -169,9 +169,9 @@ class TestAccessibility:
                 if "color:" in style or "background-color:" in style:
                     # In a real test, you would parse the colors and check contrast ratios
                     # For now, we'll just ensure the style is valid
-                    assert ";" in style or style.endswith(";"), (
-                        f"Invalid style in {html_file}: {style}"
-                    )
+                    assert ";" in style or style.endswith(
+                        ";"
+                    ), f"Invalid style in {html_file}: {style}"
 
     def test_keyboard_navigation(self, sample_html_files):
         """Test keyboard navigation support."""
@@ -340,9 +340,9 @@ class TestAccessibility:
             viewport_meta = soup.find("meta", attrs={"name": "viewport"})
             if viewport_meta:
                 content_attr = viewport_meta.get("content", "")
-                assert "width=device-width" in content_attr, (
-                    f"Invalid viewport meta tag in {html_file}"
-                )
+                assert (
+                    "width=device-width" in content_attr
+                ), f"Invalid viewport meta tag in {html_file}"
 
             # Check for touch targets (buttons, links should be large enough)
             interactive_elements = soup.find_all(

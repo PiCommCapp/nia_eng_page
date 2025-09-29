@@ -30,9 +30,9 @@ class TestPerformance:
         duration = end_time - start_time
 
         # Should complete 100 operations in under 1 second
-        assert duration < 1.0, (
-            f"ConfigManager operations took {duration:.3f}s, expected < 1.0s"
-        )
+        assert (
+            duration < 1.0
+        ), f"ConfigManager operations took {duration:.3f}s, expected < 1.0s"
 
     def test_html_generation_performance(self, test_config_manager):
         """Test HTML generation performance."""
@@ -81,9 +81,9 @@ class TestPerformance:
         duration = end_time - start_time
 
         # Should find 10 available ports in under 3 seconds
-        assert duration < 3.0, (
-            f"Find available port took {duration:.3f}s, expected < 3.0s"
-        )
+        assert (
+            duration < 3.0
+        ), f"Find available port took {duration:.3f}s, expected < 3.0s"
 
     def test_configuration_save_performance(self, test_config_manager):
         """Test configuration save performance."""
@@ -100,9 +100,9 @@ class TestPerformance:
         duration = end_time - start_time
 
         # Should save 20 times in under 1 second
-        assert duration < 1.0, (
-            f"Configuration save took {duration:.3f}s, expected < 1.0s"
-        )
+        assert (
+            duration < 1.0
+        ), f"Configuration save took {duration:.3f}s, expected < 1.0s"
 
     def test_memory_usage(self, test_config_manager):
         """Test memory usage of components."""
@@ -133,9 +133,9 @@ class TestPerformance:
         memory_increase = final_memory - initial_memory
 
         # Should not use more than 50MB for 10 instances
-        assert memory_increase < 50 * 1024 * 1024, (
-            f"Memory usage increased by {memory_increase / 1024 / 1024:.1f}MB, expected < 50MB"
-        )
+        assert (
+            memory_increase < 50 * 1024 * 1024
+        ), f"Memory usage increased by {memory_increase / 1024 / 1024:.1f}MB, expected < 50MB"
 
     def test_concurrent_operations(self, test_config_manager):
         """Test concurrent operations performance."""
@@ -179,9 +179,9 @@ class TestPerformance:
 
         # Each thread should complete in reasonable time
         for worker_id, duration in thread_results:
-            assert duration < 2.0, (
-                f"Worker {worker_id} took {duration:.3f}s, expected < 2.0s"
-            )
+            assert (
+                duration < 2.0
+            ), f"Worker {worker_id} took {duration:.3f}s, expected < 2.0s"
 
     def test_large_configuration_performance(self, test_config_manager):
         """Test performance with large configuration."""
@@ -200,9 +200,9 @@ class TestPerformance:
         duration = end_time - start_time
 
         # Should handle 100 page operations in under 1 second
-        assert duration < 1.0, (
-            f"Large configuration operations took {duration:.3f}s, expected < 1.0s"
-        )
+        assert (
+            duration < 1.0
+        ), f"Large configuration operations took {duration:.3f}s, expected < 1.0s"
 
     def test_file_io_performance(self, test_config_manager):
         """Test file I/O performance."""
@@ -221,9 +221,9 @@ class TestPerformance:
         duration = end_time - start_time
 
         # Should complete 50 save/load cycles in under 3 seconds
-        assert duration < 3.0, (
-            f"File I/O operations took {duration:.3f}s, expected < 3.0s"
-        )
+        assert (
+            duration < 3.0
+        ), f"File I/O operations took {duration:.3f}s, expected < 3.0s"
 
     def test_startup_performance(self, test_config_manager):
         """Test application startup performance."""

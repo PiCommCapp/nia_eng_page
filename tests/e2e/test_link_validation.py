@@ -90,9 +90,9 @@ class TestLinkValidation:
                 # Check if it's a directory with index.html
                 if target_file.is_dir():
                     index_file = target_file / "index.html"
-                    assert index_file.exists(), (
-                        f"Link {link} points to directory without index.html"
-                    )
+                    assert (
+                        index_file.exists()
+                    ), f"Link {link} points to directory without index.html"
                 else:
                     # For this test, we'll just log missing files
                     # In a real scenario, you might want to fail or create them
@@ -226,9 +226,9 @@ class TestLinkValidation:
 
             # Check file size (should be reasonable)
             file_size = len(content.encode("utf-8"))
-            assert file_size < 1024 * 1024, (
-                f"HTML file {html_file} is too large: {file_size} bytes"
-            )
+            assert (
+                file_size < 1024 * 1024
+            ), f"HTML file {html_file} is too large: {file_size} bytes"
 
             # Check for excessive external resources
             soup = BeautifulSoup(content, "html.parser")
@@ -237,6 +237,6 @@ class TestLinkValidation:
 
             # Should not have too many external resources
             total_external = len(external_links) + len(external_images)
-            assert total_external < 50, (
-                f"Too many external resources in {html_file}: {total_external}"
-            )
+            assert (
+                total_external < 50
+            ), f"Too many external resources in {html_file}: {total_external}"
