@@ -88,6 +88,9 @@ The NIA Engineering Portal is now **production-ready** with all core features im
   - Fixed Windows PowerShell compatibility in release package creation
   - Separated platform-specific steps to use appropriate shell syntax
   - Fixed pyproject.toml target-version field (was incorrectly set to app version instead of Python version)
+  - Fixed release workflow to properly move PyInstaller executables to platform directories
+  - Added proper file movement logic for cross-platform builds
+  - Enhanced release file preparation with better debugging and error handling
 - **Code Linting and Quality Improvements**: Resolved all Python linting errors, improved code quality, and established consistent coding standards across the project
   - Fixed bare except clauses and improved error handling
   - Resolved import order issues with proper noqa comments
