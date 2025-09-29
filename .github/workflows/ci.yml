@@ -79,7 +79,7 @@ jobs:
         uv run python -m bandit -r tray_app/ -f json -o bandit-report.json || true
 
     - name: Upload security report
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: security-report
         path: bandit-report.json
