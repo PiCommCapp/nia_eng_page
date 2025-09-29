@@ -95,6 +95,8 @@ The NIA Engineering Portal is now **production-ready** with all core features im
   - Simplified workflow by eliminating unnecessary file movement steps
   - Added comprehensive debugging to build process and artifact handling
   - Enhanced error reporting and file discovery in release workflow
+  - Fixed version script regex to only modify project version, not target-version
+  - Corrected pyproject.toml target-version field to proper Python version
 - **Code Linting and Quality Improvements**: Resolved all Python linting errors, improved code quality, and established consistent coding standards across the project
   - Fixed bare except clauses and improved error handling
   - Resolved import order issues with proper noqa comments

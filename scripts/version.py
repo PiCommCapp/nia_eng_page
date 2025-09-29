@@ -65,10 +65,14 @@ class VersionManager:
         # Validate version format
         self.parse_version(version)
 
-        # Update pyproject.toml
+        # Update pyproject.toml - only match version in [project] section
         content = self.pyproject_file.read_text()
+        # Use a more specific regex that only matches version in [project] section
         new_content = re.sub(
-            r'version\s*=\s*["\'][^"\']+["\']', f'version = "{version}"', content
+            r'^version\s*=\s*["\'][^"\']+["\']',
+            f'version = "{version}"',
+            content,
+            flags=re.MULTILINE,
         )
         self.pyproject_file.write_text(new_content)
 
