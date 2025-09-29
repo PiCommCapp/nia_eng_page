@@ -15,10 +15,11 @@ from version import VersionManager
 class ReleaseBuilder:
     """Builds release packages for different platforms."""
 
-    def __init__(self, project_root: Path = None):
+    def __init__(self, project_root: Path = None, skip_tests: bool = False):
         self.project_root = project_root or Path(__file__).parent.parent
         self.dist_dir = self.project_root / "dist"
         self.build_dir = self.project_root / "build"
+        self.skip_tests = skip_tests
 
     def clean_build_dirs(self) -> None:
         """Clean build and dist directories."""
@@ -40,6 +41,10 @@ class ReleaseBuilder:
 
     def run_tests(self) -> bool:
         """Run tests before building."""
+        if self.skip_tests:
+            print("⚠️  Skipping tests (--skip-tests flag provided)")
+            return True
+
         print("🧪 Running tests...")
 
         try:
@@ -54,7 +59,11 @@ class ReleaseBuilder:
                 print("  ✅ All tests passed")
                 return True
             else:
-                print(f"  ❌ Tests failed: {result.stderr}")
+                print(f"  ❌ Tests failed with return code: {result.returncode}")
+                print("  📋 STDOUT:")
+                print(result.stdout)
+                print("  📋 STDERR:")
+                print(result.stderr)
                 return False
 
         except Exception as e:
@@ -287,12 +296,8 @@ For issues and questions, please refer to the documentation or contact the devel
 
 def main():
     """Main entry point."""
-    builder = ReleaseBuilder()
-
-    if len(sys.argv) > 1 and sys.argv[1] == "--skip-tests":
-        print("⚠️  Skipping tests (--skip-tests flag provided)")
-        # Override the test method to always return True
-        builder.run_tests = lambda: True
+    skip_tests = len(sys.argv) > 1 and sys.argv[1] == "--skip-tests"
+    builder = ReleaseBuilder(skip_tests=skip_tests)
 
     success = builder.build_all()
     sys.exit(0 if success else 1)

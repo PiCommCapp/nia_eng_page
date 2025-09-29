@@ -42,6 +42,13 @@ jobs:
       run: |
         uv sync
 
+    - name: Set up virtual display
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y xvfb
+        export DISPLAY=:99
+        Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
+
     - name: Configure Git
       run: |
         git config --global user.name "GitHub Actions"
@@ -61,11 +68,13 @@ jobs:
       if: ${{ !github.event.inputs.skip_tests }}
       run: |
         echo "Running tests..."
+        export DISPLAY=:99
         uv run make test
 
     - name: Build release packages
       run: |
         echo "Building release packages..."
+        export DISPLAY=:99
         if [ "${{ github.event.inputs.skip_tests }}" = "true" ]; then
           uv run python scripts/build_release.py --skip-tests
         else

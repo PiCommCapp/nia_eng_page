@@ -68,6 +68,9 @@ The NIA Engineering Portal is now **production-ready** with all core features im
   - Fixed code formatting conflicts between Ruff and Black formatters
   - Configured Ruff to exclude problematic test files from formatting (let Black handle them)
   - Achieved 100% formatting compliance for both Ruff and Black
+  - Fixed release workflow test failures by adding virtual display setup
+  - Improved build script error reporting with detailed test output
+  - Enhanced --skip-tests functionality in build_release.py
 - **Code Linting and Quality Improvements**: Resolved all Python linting errors, improved code quality, and established consistent coding standards across the project
   - Fixed bare except clauses and improved error handling
   - Resolved import order issues with proper noqa comments
