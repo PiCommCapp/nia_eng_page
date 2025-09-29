@@ -1,18 +1,46 @@
 # NIA Engineering Portal - Task List
 
-## 🚀 Current Status: Production Ready
+## 🚀 Current Status: Rebuilding Release System
 
-The NIA Engineering Portal is now **production-ready** with all core features implemented and tested.
+The NIA Engineering Portal core application is complete and functional. We are now rebuilding the release system from scratch to create reliable, self-contained, portable applications.
 
-### ✅ What's Complete
+### ✅ Core Application Complete
 
 - **Desktop Tray Application** with cross-platform support (Windows, macOS, Linux)
 - **Web-based Configuration Interface** for easy management
 - **Comprehensive Testing Suite** with 100% test coverage
-- **Automated Deployment System** with GitHub Actions
-- **Version Management** with automated bumping and releases
 - **Code Quality Standards** with full linting compliance
-- **Cross-platform Builds** and packaging
+
+### 🔄 Currently Rebuilding
+
+- **Release System**: Clean, simple workflow for creating portable applications
+- **macOS Support**: Both Intel (x64) and Apple Silicon (ARM64) versions
+- **Windows Support**: Self-contained executable
+- **Linux Support**: Portable application package
+
+---
+
+## 🔄 Current Rebuild: Clean Release System
+
+### New Release Workflow Features
+
+- **Simple Matrix Build**: Clean separation of platforms and architectures
+- **macOS Dual Architecture**: Both Intel (x64) and Apple Silicon (ARM64) builds
+- **Self-contained Executables**: Portable applications with all dependencies
+- **Direct PyInstaller Output**: No complex file movement or directory juggling
+- **Clear Artifact Structure**: Platform-architecture naming (e.g., `macos-x64`, `macos-arm64`)
+- **Archive Creation**: Automatic tar.gz (Unix) and zip (Windows) packaging
+- **Comprehensive Testing**: Optional test runs before building
+- **Manual Trigger Only**: No automatic builds, only on-demand releases
+
+### Build Matrix
+
+| Platform | Architecture          | Output Format        | Executable Name              |
+| -------- | --------------------- | -------------------- | ---------------------------- |
+| macOS    | x64 (Intel)           | `macos-x64.tar.gz`   | `nia-engineering-portal`     |
+| macOS    | ARM64 (Apple Silicon) | `macos-arm64.tar.gz` | `nia-engineering-portal`     |
+| Windows  | x64                   | `windows-x64.zip`    | `nia-engineering-portal.exe` |
+| Linux    | x64                   | `linux-x64.tar.gz`   | `nia-engineering-portal`     |
 
 ---
 

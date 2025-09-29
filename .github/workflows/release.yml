@@ -1,4 +1,4 @@
-name: Release
+name: Release Build
 
 on:
   workflow_dispatch:
@@ -13,176 +13,34 @@ on:
           - minor
           - major
       skip_tests:
-        description: 'Skip tests (for emergency releases)'
+        description: 'Skip tests (for faster builds)'
         required: false
         default: false
         type: boolean
 
 jobs:
   build:
+    runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
-    runs-on: ${{ matrix.os }}
-    permissions:
-      contents: write
-      packages: write
-      issues: write
-      pull-requests: write
+        include:
+          - os: ubuntu-latest
+            platform: linux
+            arch: x64
+          - os: windows-latest
+            platform: windows
+            arch: x64
+          - os: macos-latest
+            platform: macos
+            arch: x64
+          - os: macos-latest
+            platform: macos
+            arch: arm64
 
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
-      with:
-        fetch-depth: 0  # Fetch full history for version bumping
-
-    - name: Set up Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.12'
-
-    - name: Install UV (Windows)
-      if: matrix.os == 'windows-latest'
-      run: |
-        powershell -c "irm https://astral.sh/uv/install.ps1 | iex"
-
-    - name: Install UV (Unix)
-      if: matrix.os != 'windows-latest'
-      run: |
-        curl -LsSf https://astral.sh/uv/install.sh | sh
-        echo "$HOME/.cargo/bin" >> $GITHUB_PATH
-
-    - name: Install dependencies
-      run: |
-        uv sync
-
-    - name: Set up virtual display (Ubuntu only)
-      if: matrix.os == 'ubuntu-latest'
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y xvfb
-        export DISPLAY=:99
-        Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
-
-    - name: Run tests (Ubuntu)
-      if: ${{ !github.event.inputs.skip_tests && matrix.os == 'ubuntu-latest' }}
-      run: |
-        echo "Running tests on Ubuntu..."
-        export DISPLAY=:99
-        uv run make test
-
-    - name: Run tests (Windows/macOS)
-      if: ${{ !github.event.inputs.skip_tests && matrix.os != 'ubuntu-latest' }}
-      run: |
-        echo "Running tests on ${{ matrix.os }}..."
-        uv run make test
-
-    - name: Build executable (Ubuntu)
-      if: matrix.os == 'ubuntu-latest'
-      run: |
-        echo "Building executable for Ubuntu..."
-        export DISPLAY=:99
-        uv run python scripts/build_tray.py
-
-        # Verify the build output
-        if [ -d "dist/linux" ]; then
-          echo "Linux build completed successfully"
-          echo "Contents of dist/linux:"
-          ls -la dist/linux/
-        else
-          echo "ERROR: dist/linux directory not found"
-          exit 1
-        fi
-
-    - name: Build executable (macOS)
-      if: matrix.os == 'macos-latest'
-      run: |
-        echo "Building executable for macOS..."
-        uv run python scripts/build_tray.py
-
-        # Verify the build output
-        if [ -d "dist/macos" ]; then
-          echo "macOS build completed successfully"
-          echo "Contents of dist/macos:"
-          ls -la dist/macos/
-        else
-          echo "ERROR: dist/macos directory not found"
-          exit 1
-        fi
-
-    - name: Build executable (Windows)
-      if: matrix.os == 'windows-latest'
-      shell: cmd
-      run: |
-        echo Building executable for windows-latest...
-        uv run python scripts/build_tray.py
-
-        rem Verify the build output
-        if exist "dist\windows" (
-          echo Windows build completed successfully
-          echo Contents of dist\windows:
-          dir "dist\windows" /B
-        ) else (
-          echo ERROR: dist\windows directory not found
-          exit 1
-        )
-
-    - name: List build artifacts (Ubuntu/macOS)
-      if: matrix.os != 'windows-latest'
-      run: |
-        echo "=== BUILD ARTIFACTS DEBUG ==="
-        echo "Current directory contents:"
-        ls -la
-        echo "Dist directory contents:"
-        if [ -d "dist" ]; then
-          find dist/ -type f | head -20
-          echo "Dist subdirectories:"
-          ls -la dist/
-        else
-          echo "No dist directory found"
-        fi
-        echo "Looking for any nia-engineering-portal files:"
-        find . -name "*nia-engineering-portal*" 2>/dev/null || echo "No nia-engineering-portal files found"
-
-    - name: List build artifacts (Windows)
-      if: matrix.os == 'windows-latest'
-      shell: cmd
-      run: |
-        echo === BUILD ARTIFACTS DEBUG ===
-        echo Current directory contents:
-        dir /B
-        echo Dist directory contents:
-        if exist "dist" (
-          echo Dist subdirectories:
-          dir "dist" /B
-          echo Looking for nia-engineering-portal files:
-          dir "dist" /S /B | findstr "nia-engineering-portal"
-        ) else (
-          echo No dist directory found
-        )
-
-    - name: Upload build artifacts
-      uses: actions/upload-artifact@v4
-      with:
-        name: build-${{ matrix.os }}
-        path: |
-          dist/
-        retention-days: 7
-
-  release:
-    needs: build
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-      packages: write
-      issues: write
-      pull-requests: write
-
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-      with:
-        fetch-depth: 0
 
     - name: Set up Python
       uses: actions/setup-python@v4
@@ -190,13 +48,83 @@ jobs:
         python-version: '3.12'
 
     - name: Install UV
-      run: |
-        curl -LsSf https://astral.sh/uv/install.sh | sh
-        echo "$HOME/.cargo/bin" >> $GITHUB_PATH
+      uses: astral-sh/setup-uv@v4
+      with:
+        version: "latest"
 
     - name: Install dependencies
+      run: uv sync
+
+    - name: Run tests (Ubuntu)
+      if: matrix.os == 'ubuntu-latest' && !github.event.inputs.skip_tests
       run: |
-        uv sync
+        export DISPLAY=:99
+        sudo apt-get update
+        sudo apt-get install -y xvfb
+        Xvfb :99 -screen 0 1024x768x24 &
+        uv run make test
+
+    - name: Run tests (Windows/macOS)
+      if: matrix.os != 'ubuntu-latest' && !github.event.inputs.skip_tests
+      run: uv run make test
+
+    - name: Build executable
+      run: |
+        echo "Building for ${{ matrix.platform }} (${{ matrix.arch }})"
+
+        # Create output directory
+        mkdir -p dist/${{ matrix.platform }}-${{ matrix.arch }}
+
+        # Build with PyInstaller
+        if [ "${{ matrix.platform }}" = "macos" ] && [ "${{ matrix.arch }}" = "arm64" ]; then
+          # Build ARM64 version on macOS
+          arch -arm64 uv run pyinstaller --clean --distpath dist/${{ matrix.platform }}-${{ matrix.arch }} --name nia-engineering-portal tray_app.spec
+        else
+          # Build regular version
+          uv run pyinstaller --clean --distpath dist/${{ matrix.platform }}-${{ matrix.arch }} --name nia-engineering-portal tray_app.spec
+        fi
+
+        # Verify build
+        echo "Build contents:"
+        ls -la dist/${{ matrix.platform }}-${{ matrix.arch }}/
+
+        # Create archive
+        cd dist
+        if [ "${{ matrix.platform }}" = "windows" ]; then
+          zip -r ${{ matrix.platform }}-${{ matrix.arch }}.zip ${{ matrix.platform }}-${{ matrix.arch }}/
+        else
+          tar -czf ${{ matrix.platform }}-${{ matrix.arch }}.tar.gz ${{ matrix.platform }}-${{ matrix.arch }}/
+        fi
+        cd ..
+
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ matrix.platform }}-${{ matrix.arch }}
+        path: dist/${{ matrix.platform }}-${{ matrix.arch }}.tar.gz
+        retention-days: 30
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch'
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.12'
+
+    - name: Install UV
+      uses: astral-sh/setup-uv@v4
+      with:
+        version: "latest"
+
+    - name: Install dependencies
+      run: uv sync
 
     - name: Configure Git
       run: |
@@ -223,127 +151,74 @@ jobs:
         echo "Preparing release files..."
         mkdir -p release-packages
 
-        # Debug: List all artifact contents
-        echo "=== DEBUGGING ARTIFACT CONTENTS ==="
-        for platform in ubuntu-latest windows-latest macos-latest; do
-          if [ -d "artifacts/build-$platform" ]; then
-            echo "Contents of artifacts/build-$platform:"
-            ls -la "artifacts/build-$platform/"
-            echo "Looking for dist directory..."
-            find "artifacts/build-$platform" -name "dist" -type d
-            echo "Looking for any executable files..."
-            find "artifacts/build-$platform" -type f -executable
-            echo "Looking for .exe files (Windows)..."
-            find "artifacts/build-$platform" -name "*.exe"
-            echo "Looking for nia-engineering-portal files..."
-            find "artifacts/build-$platform" -name "*nia-engineering-portal*"
-            echo "---"
+        # Copy all platform archives
+        for artifact in artifacts/*/; do
+          platform=$(basename "$artifact")
+          echo "Processing $platform..."
+          if [ -f "$artifact/$platform.tar.gz" ]; then
+            cp "$artifact/$platform.tar.gz" release-packages/
+          elif [ -f "$artifact/$platform.zip" ]; then
+            cp "$artifact/$platform.zip" release-packages/
+          else
+            echo "No archive found for $platform"
+            ls -la "$artifact"
           fi
         done
 
-        # Copy artifacts from each platform
-        for platform in ubuntu-latest windows-latest macos-latest; do
-          if [ -d "artifacts/build-$platform" ]; then
-            echo "Processing $platform artifacts..."
-            # Copy the entire dist directory structure
-            if [ -d "artifacts/build-$platform/dist" ]; then
-              echo "Found dist directory in $platform, copying..."
-              cp -r artifacts/build-$platform/dist/* release-packages/ || true
-            else
-              echo "No dist directory found in $platform artifacts"
-              # Try to find and copy any executable files
-              find "artifacts/build-$platform" -name "*nia-engineering-portal*" -exec cp {} release-packages/ \; || true
-            fi
-          fi
-        done
-
-        # List all files
+        # List what we have
         echo "Release files:"
-        find release-packages/ -type f | head -20
+        ls -la release-packages/
 
-        # Create a summary of what we have
-        echo "Platform directories found:"
-        find release-packages/ -type d -name "linux" -o -name "windows" -o -name "macos" | head -10
-
-        # Show directory structure
-        echo "Directory structure:"
-        ls -la release-packages/ || echo "No release-packages directory"
-        for dir in release-packages/*/; do
-          if [ -d "$dir" ]; then
-            echo "Contents of $(basename "$dir"):"
-            ls -la "$dir" | head -10
-          fi
-        done
-
-    - name: Check if tag exists
+    - name: Create tag
       run: |
         NEW_VERSION=$(uv run python scripts/version.py get)
-        echo "NEW_VERSION=$NEW_VERSION" >> $GITHUB_ENV
-        TAG_NAME="v$NEW_VERSION"
-        echo "Checking if tag $TAG_NAME exists..."
-        if git rev-parse "$TAG_NAME" >/dev/null 2>&1; then
-          echo "⚠️  Tag $TAG_NAME already exists!"
-          echo "Deleting existing tag..."
-          git tag -d "$TAG_NAME" || true
-          git push origin ":refs/tags/$TAG_NAME" || true
-        else
-          echo "✅ Tag $TAG_NAME does not exist, proceeding with release"
+        echo "Creating tag v$NEW_VERSION..."
+
+        # Check if tag exists
+        if git rev-parse "v$NEW_VERSION" >/dev/null 2>&1; then
+          echo "Tag v$NEW_VERSION already exists, deleting..."
+          git tag -d "v$NEW_VERSION"
+          git push origin ":refs/tags/v$NEW_VERSION" || true
         fi
 
-    - name: Commit version bump
-      run: |
-        NEW_VERSION=$(uv run python scripts/version.py get)
-        git add pyproject.toml VERSION
+        # Create and push tag
+        git add .
         git commit -m "Bump version to v$NEW_VERSION" || echo "No changes to commit"
+        git tag "v$NEW_VERSION"
         git push origin main
-
-    - name: Create and push tag
-      run: |
-        NEW_VERSION=$(uv run python scripts/version.py get)
-        TAG_NAME="v$NEW_VERSION"
-        echo "Creating tag $TAG_NAME..."
-        git tag -a "$TAG_NAME" -m "Release $TAG_NAME"
-        git push origin "$TAG_NAME"
+        git push origin "v$NEW_VERSION"
 
     - name: Create GitHub Release
       uses: softprops/action-gh-release@v2
       with:
         tag_name: v${{ env.NEW_VERSION }}
-        name: NIA Engineering Portal v${{ env.NEW_VERSION }}
+        name: Release v${{ env.NEW_VERSION }}
         body: |
-          ## What's New in v${{ env.NEW_VERSION }}
+          # NIA Engineering Portal v${{ env.NEW_VERSION }}
 
-          - Cross-platform tray application
-          - Web-based configuration interface
-          - Comprehensive testing framework
-          - Performance optimizations
-          - Accessibility improvements
+          ## Downloads
+
+          Choose the appropriate file for your platform:
+
+          - **macOS Intel (x64)**: `macos-x64.tar.gz`
+          - **macOS Apple Silicon (ARM64)**: `macos-arm64.tar.gz`
+          - **Windows (x64)**: `windows-x64.zip`
+          - **Linux (x64)**: `linux-x64.tar.gz`
 
           ## Installation
 
-          1. Download the appropriate package for your platform
+          1. Download the appropriate file for your platform
           2. Extract the archive
-          3. Run the installer script: `./install-<platform>.sh`
+          3. Run the `nia-engineering-portal` executable
 
-          ## System Requirements
+          ## Features
 
-          - Python 3.12 or higher
-          - Modern web browser
-          - 50MB available disk space
-
-          ## Files
-
-          See the attached files for platform-specific packages.
-        files: |
-          release-packages/linux/*
-          release-packages/windows/*
-          release-packages/macos/*
-          release-packages/*.tar.gz
-          release-packages/*.sh
-          release-packages/RELEASE_NOTES.md
+          - Cross-platform desktop application
+          - System tray integration
+          - Web-based configuration
+          - Local web server for engineering portal
+        files: release-packages/*
         draft: false
         prerelease: false
         generate_release_notes: true
         make_latest: true
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
