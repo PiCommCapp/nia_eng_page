@@ -127,7 +127,8 @@ jobs:
           exit 1
         )
 
-    - name: List build artifacts
+    - name: List build artifacts (Ubuntu/macOS)
+      if: matrix.os != 'windows-latest'
       run: |
         echo "=== BUILD ARTIFACTS DEBUG ==="
         echo "Current directory contents:"
@@ -142,6 +143,23 @@ jobs:
         fi
         echo "Looking for any nia-engineering-portal files:"
         find . -name "*nia-engineering-portal*" 2>/dev/null || echo "No nia-engineering-portal files found"
+
+    - name: List build artifacts (Windows)
+      if: matrix.os == 'windows-latest'
+      shell: cmd
+      run: |
+        echo === BUILD ARTIFACTS DEBUG ===
+        echo Current directory contents:
+        dir /B
+        echo Dist directory contents:
+        if exist "dist" (
+          echo Dist subdirectories:
+          dir "dist" /B
+          echo Looking for nia-engineering-portal files:
+          dir "dist" /S /B | findstr "nia-engineering-portal"
+        ) else (
+          echo No dist directory found
+        )
 
     - name: Upload build artifacts
       uses: actions/upload-artifact@v4
