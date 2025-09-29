@@ -75,7 +75,7 @@ class VersionManager:
         # Create VERSION file
         self.version_file.write_text(f"{version}\n")
 
-        print(f"✅ Version updated to {version}")
+        print(f"[OK] Version updated to {version}")
 
     def get_version_info(self) -> dict:
         """Get comprehensive version information."""
