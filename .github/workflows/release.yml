@@ -21,6 +21,11 @@ on:
 jobs:
   release:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      packages: write
+      issues: write
+      pull-requests: write
 
     steps:
     - name: Checkout code
@@ -81,8 +86,41 @@ jobs:
           uv run python scripts/build_release.py
         fi
 
+    - name: List build artifacts
+      run: |
+        echo "Build artifacts:"
+        ls -la dist/ || echo "No dist directory found"
+        echo "Files to upload:"
+        find dist/ -name "*.tar.gz" -o -name "*.sh" -o -name "RELEASE_NOTES.md" | head -10
+
+    - name: Check if tag exists
+      run: |
+        TAG_NAME="v${{ env.NEW_VERSION }}"
+        echo "Checking if tag $TAG_NAME exists..."
+        if git rev-parse "$TAG_NAME" >/dev/null 2>&1; then
+          echo "⚠️  Tag $TAG_NAME already exists!"
+          echo "Deleting existing tag..."
+          git tag -d "$TAG_NAME" || true
+          git push origin ":refs/tags/$TAG_NAME" || true
+        else
+          echo "✅ Tag $TAG_NAME does not exist, proceeding with release"
+        fi
+
+    - name: Commit version bump
+      run: |
+        git add pyproject.toml VERSION
+        git commit -m "Bump version to v${{ env.NEW_VERSION }}" || echo "No changes to commit"
+        git push origin main
+
+    - name: Create and push tag
+      run: |
+        TAG_NAME="v${{ env.NEW_VERSION }}"
+        echo "Creating tag $TAG_NAME..."
+        git tag -a "$TAG_NAME" -m "Release $TAG_NAME"
+        git push origin "$TAG_NAME"
+
     - name: Create GitHub Release
-      uses: softprops/action-gh-release@v1
+      uses: softprops/action-gh-release@v2
       with:
         tag_name: v${{ env.NEW_VERSION }}
         name: NIA Engineering Portal v${{ env.NEW_VERSION }}
@@ -116,14 +154,21 @@ jobs:
           dist/RELEASE_NOTES.md
         draft: false
         prerelease: false
+        generate_release_notes: true
+        make_latest: true
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-    - name: Commit version bump
+    - name: Verify release creation
       run: |
-        git add pyproject.toml VERSION
-        git commit -m "Bump version to v${{ env.NEW_VERSION }}"
-        git push origin main
+        echo "Verifying release was created..."
+        TAG_NAME="v${{ env.NEW_VERSION }}"
+        if git rev-parse "$TAG_NAME" >/dev/null 2>&1; then
+          echo "✅ Tag $TAG_NAME exists"
+        else
+          echo "❌ Tag $TAG_NAME not found"
+          exit 1
+        fi
 
     - name: Upload build artifacts
       uses: actions/upload-artifact@v4
