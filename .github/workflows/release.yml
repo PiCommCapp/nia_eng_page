@@ -90,6 +90,37 @@ jobs:
         echo "Building executable for ${{ matrix.os }}..."
         uv run python scripts/build_tray.py
 
+    - name: Create release package
+      run: |
+        echo "Creating release package for ${{ matrix.os }}..."
+        # Create platform-specific directory
+        PLATFORM_NAME=""
+        if [ "${{ matrix.os }}" = "ubuntu-latest" ]; then
+          PLATFORM_NAME="linux"
+        elif [ "${{ matrix.os }}" = "windows-latest" ]; then
+          PLATFORM_NAME="windows"
+        elif [ "${{ matrix.os }}" = "macos-latest" ]; then
+          PLATFORM_NAME="macos"
+        fi
+
+        # Create final package directory
+        mkdir -p dist/$PLATFORM_NAME
+
+        # Copy built files to platform directory
+        if [ -d "dist/$PLATFORM_NAME" ]; then
+          echo "Found platform-specific build directory"
+          # Files are already in the right place
+        else
+          echo "Moving files to platform directory"
+          # Move files from dist/ to dist/$PLATFORM_NAME/
+          mkdir -p dist/$PLATFORM_NAME
+          cp -r dist/* dist/$PLATFORM_NAME/ 2>/dev/null || true
+        fi
+
+        # List what we have
+        echo "Release package contents:"
+        find dist/$PLATFORM_NAME -type f | head -10
+
     - name: Upload build artifacts
       uses: actions/upload-artifact@v4
       with:
@@ -156,13 +187,18 @@ jobs:
         for platform in ubuntu-latest windows-latest macos-latest; do
           if [ -d "artifacts/build-$platform" ]; then
             echo "Processing $platform artifacts..."
-            cp -r artifacts/build-$platform/* release-packages/ || true
+            # Copy the entire dist directory structure
+            cp -r artifacts/build-$platform/dist/* release-packages/ || true
           fi
         done
 
         # List all files
         echo "Release files:"
         find release-packages/ -type f | head -20
+
+        # Create a summary of what we have
+        echo "Platform directories found:"
+        find release-packages/ -type d -name "linux" -o -name "windows" -o -name "macos" | head -10
 
     - name: Check if tag exists
       run: |
@@ -224,6 +260,9 @@ jobs:
 
           See the attached files for platform-specific packages.
         files: |
+          release-packages/linux/*
+          release-packages/windows/*
+          release-packages/macos/*
           release-packages/*.tar.gz
           release-packages/*.sh
           release-packages/RELEASE_NOTES.md
