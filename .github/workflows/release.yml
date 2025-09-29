@@ -121,11 +121,20 @@ jobs:
         powershell -Command "Compress-Archive -Path 'windows-x64' -DestinationPath 'windows-x64.zip' -Force"
         cd ..
 
-    - name: Upload build artifacts
+    - name: Upload build artifacts (Ubuntu/macOS)
+      if: matrix.os != 'windows-latest'
       uses: actions/upload-artifact@v4
       with:
         name: ${{ matrix.platform }}-${{ matrix.arch }}
         path: dist/${{ matrix.platform }}-${{ matrix.arch }}.tar.gz
+        retention-days: 30
+
+    - name: Upload build artifacts (Windows)
+      if: matrix.os == 'windows-latest'
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ matrix.platform }}-${{ matrix.arch }}
+        path: dist/${{ matrix.platform }}-${{ matrix.arch }}.zip
         retention-days: 30
 
   release:
@@ -181,11 +190,14 @@ jobs:
           platform=$(basename "$artifact")
           echo "Processing $platform..."
           if [ -f "$artifact/$platform.tar.gz" ]; then
+            echo "Found tar.gz for $platform"
             cp "$artifact/$platform.tar.gz" release-packages/
           elif [ -f "$artifact/$platform.zip" ]; then
+            echo "Found zip for $platform"
             cp "$artifact/$platform.zip" release-packages/
           else
             echo "No archive found for $platform"
+            echo "Contents of $platform artifact:"
             ls -la "$artifact"
           fi
         done

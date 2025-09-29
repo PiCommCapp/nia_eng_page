@@ -33,6 +33,7 @@ The NIA Engineering Portal core application is complete and functional. We are n
 - **Comprehensive Testing**: Optional test runs before building
 - **Manual Trigger Only**: No automatic builds, only on-demand releases
 - **Proper Git Permissions**: Fixed GitHub Actions permissions for pushing tags and commits
+- **Fixed Windows Artifact Upload**: Separated artifact upload paths for Windows (.zip) vs Unix (.tar.gz)
 
 ### Build Matrix
 
