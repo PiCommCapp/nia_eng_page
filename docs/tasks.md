@@ -74,6 +74,9 @@ The NIA Engineering Portal is now **production-ready** with all core features im
   - Fixed GitHub release creation 403 errors by adding proper permissions
   - Updated softprops/action-gh-release to v2 with better error handling
   - Added tag management and verification steps to release workflow
+  - Simplified GitHub workflows by consolidating build-matrix into release workflow
+  - Created single release workflow that builds for all platforms and creates GitHub release
+  - Eliminated confusing dual-workflow setup for cleaner CI/CD process
 - **Code Linting and Quality Improvements**: Resolved all Python linting errors, improved code quality, and established consistent coding standards across the project
   - Fixed bare except clauses and improved error handling
   - Resolved import order issues with proper noqa comments

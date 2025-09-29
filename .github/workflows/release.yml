@@ -19,8 +19,11 @@ on:
         type: boolean
 
 jobs:
-  release:
-    runs-on: ubuntu-latest
+  build:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
     permissions:
       contents: write
       packages: write
@@ -40,14 +43,19 @@ jobs:
 
     - name: Install UV
       run: |
-        curl -LsSf https://astral.sh/uv/install.sh | sh
-        echo "$HOME/.cargo/bin" >> $GITHUB_PATH
+        if [ "${{ matrix.os }}" = "windows-latest" ]; then
+          powershell -c "irm https://astral.sh/uv/install.ps1 | iex"
+        else
+          curl -LsSf https://astral.sh/uv/install.sh | sh
+          echo "$HOME/.cargo/bin" >> $GITHUB_PATH
+        fi
 
     - name: Install dependencies
       run: |
         uv sync
 
-    - name: Set up virtual display
+    - name: Set up virtual display (Ubuntu only)
+      if: matrix.os == 'ubuntu-latest'
       run: |
         sudo apt-get update
         sudo apt-get install -y xvfb
@@ -73,29 +81,69 @@ jobs:
       if: ${{ !github.event.inputs.skip_tests }}
       run: |
         echo "Running tests..."
-        export DISPLAY=:99
+        if [ "${{ matrix.os }}" = "ubuntu-latest" ]; then
+          export DISPLAY=:99
+        fi
         uv run make test
 
-    - name: Build release packages
+    - name: Build executable
       run: |
-        echo "Building release packages..."
-        export DISPLAY=:99
-        if [ "${{ github.event.inputs.skip_tests }}" = "true" ]; then
-          uv run python scripts/build_release.py --skip-tests
-        else
-          uv run python scripts/build_release.py
+        echo "Building executable for ${{ matrix.os }}..."
+        if [ "${{ matrix.os }}" = "ubuntu-latest" ]; then
+          export DISPLAY=:99
         fi
+        uv run python scripts/build_tray.py
 
-    - name: List build artifacts
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: build-${{ matrix.os }}
+        path: |
+          dist/
+        retention-days: 7
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      packages: write
+      issues: write
+      pull-requests: write
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Download all artifacts
+      uses: actions/download-artifact@v4
+      with:
+        path: artifacts/
+
+    - name: Prepare release files
       run: |
-        echo "Build artifacts:"
-        ls -la dist/ || echo "No dist directory found"
-        echo "Files to upload:"
-        find dist/ -name "*.tar.gz" -o -name "*.sh" -o -name "RELEASE_NOTES.md" | head -10
+        echo "Preparing release files..."
+        mkdir -p release-packages
+
+        # Copy artifacts from each platform
+        for platform in ubuntu-latest windows-latest macos-latest; do
+          if [ -d "artifacts/build-$platform" ]; then
+            echo "Processing $platform artifacts..."
+            cp -r artifacts/build-$platform/* release-packages/ || true
+          fi
+        done
+
+        # List all files
+        echo "Release files:"
+        find release-packages/ -type f | head -20
 
     - name: Check if tag exists
       run: |
-        TAG_NAME="v${{ env.NEW_VERSION }}"
+        NEW_VERSION=$(uv run python scripts/version.py get)
+        echo "NEW_VERSION=$NEW_VERSION" >> $GITHUB_ENV
+        TAG_NAME="v$NEW_VERSION"
         echo "Checking if tag $TAG_NAME exists..."
         if git rev-parse "$TAG_NAME" >/dev/null 2>&1; then
           echo "⚠️  Tag $TAG_NAME already exists!"
@@ -108,13 +156,15 @@ jobs:
 
     - name: Commit version bump
       run: |
+        NEW_VERSION=$(uv run python scripts/version.py get)
         git add pyproject.toml VERSION
-        git commit -m "Bump version to v${{ env.NEW_VERSION }}" || echo "No changes to commit"
+        git commit -m "Bump version to v$NEW_VERSION" || echo "No changes to commit"
         git push origin main
 
     - name: Create and push tag
       run: |
-        TAG_NAME="v${{ env.NEW_VERSION }}"
+        NEW_VERSION=$(uv run python scripts/version.py get)
+        TAG_NAME="v$NEW_VERSION"
         echo "Creating tag $TAG_NAME..."
         git tag -a "$TAG_NAME" -m "Release $TAG_NAME"
         git push origin "$TAG_NAME"
@@ -149,30 +199,12 @@ jobs:
 
           See the attached files for platform-specific packages.
         files: |
-          dist/*.tar.gz
-          dist/*.sh
-          dist/RELEASE_NOTES.md
+          release-packages/*.tar.gz
+          release-packages/*.sh
+          release-packages/RELEASE_NOTES.md
         draft: false
         prerelease: false
         generate_release_notes: true
         make_latest: true
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-    - name: Verify release creation
-      run: |
-        echo "Verifying release was created..."
-        TAG_NAME="v${{ env.NEW_VERSION }}"
-        if git rev-parse "$TAG_NAME" >/dev/null 2>&1; then
-          echo "✅ Tag $TAG_NAME exists"
-        else
-          echo "❌ Tag $TAG_NAME not found"
-          exit 1
-        fi
-
-    - name: Upload build artifacts
-      uses: actions/upload-artifact@v4
-      with:
-        name: release-packages-v${{ env.NEW_VERSION }}
-        path: dist/
-        retention-days: 30
