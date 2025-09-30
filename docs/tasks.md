@@ -1,8 +1,16 @@
 # NIA Engineering Portal - Task List
 
-## 🚀 Current Status: Rebuilding Release System
+## 🚀 Current Status: Bug Fixes and Maintenance
 
-The NIA Engineering Portal core application is complete and functional. We are now rebuilding the release system from scratch to create reliable, self-contained, portable applications.
+The NIA Engineering Portal core application is complete and functional. We are currently addressing minor UI issues and maintaining the system.
+
+### 🔧 Recent Bug Fixes
+
+- **Committee Room Page Styling**: Fixed missing CSS styling on committees.html page
+  - Issue: Committee room landing page was displaying as plain list of links without proper formatting
+  - Root Cause: Page was only loading common.css but missing main.css which contains room-grid and room-card styles
+  - Solution: Added main.css link to committees.html page
+  - Status: ✅ Fixed
 
 ### ✅ Core Application Complete
 
