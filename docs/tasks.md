@@ -35,10 +35,16 @@ The NIA Engineering Portal core application is complete and functional. We have 
   - Status: ✅ Complete
 
 - **README.md Enhancement**: Created professional, helpful README with badges and documentation links
+
   - Issue: README.md was basic and didn't provide clear guidance or professional appearance
   - Solution: Added badges, quick start guide, documentation links, and professional structure
   - Added: Python/platform badges, GitHub Pages documentation links, clear installation steps
   - Status: ✅ Complete
+
+- **Linting Fixes**: Resolved Python linting errors in desktop shortcut creation script
+  - Issue: S103 linting errors for permissive file permissions (0o755) in create_desktop_shortcut.py
+  - Solution: Changed file permissions to 0o744 (owner read/write/execute, group/other read-only)
+  - Status: ✅ Fixed
 
 ### ✅ Core Application Complete
 

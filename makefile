@@ -30,6 +30,7 @@ help:
 	@echo "Tray Application Commands:"
 	@echo "  make tray       - Run the tray application (requires display)"
 	@echo "  make tray-bg    - Run the tray application in background (no terminal needed)"
+	@echo "  make tray-port PORT=8080 - Set tray application port and launch"
 	@echo "  make tray-shortcut - Create desktop shortcut for the application"
 	@echo "  make test-tray  - Test tray application components"
 	@echo "  make build-tray - Build executable for current platform"
@@ -244,6 +245,13 @@ tray-bg-windows:
 	@echo "✅ Tray application started in background"
 	@echo "🖥️  Look for the NIA Engineering Portal icon in your system tray"
 	@echo "🛑 To stop the application, right-click the tray icon and select 'Quit'"
+
+# Set tray application port and launch
+tray-port:
+	@echo "🖥️  Setting tray application port to $(PORT)..."
+	@uv run python -c "from tray_app.config_manager import ConfigManager; cm = ConfigManager(); cm.set('port', $(PORT)); cm.save_config(); print('Port set to $(PORT)')"
+	@echo "🚀 Launching tray application in background..."
+	@$(MAKE) tray-bg
 
 # Create desktop shortcut for the application
 tray-shortcut:

@@ -87,7 +87,7 @@ nohup uv run python tray_app/main.py > /dev/null 2>&1 &
         f.write(script_content)
 
     # Make script executable
-    os.chmod(launch_script, 0o755)
+    os.chmod(launch_script, 0o744)
 
     print(f"✅ macOS application created: {app_dir}")
     print("🖥️  You can find the app in your Applications folder")
@@ -116,7 +116,7 @@ Categories=Utility;Network;
         f.write(entry_content)
 
     # Make executable
-    os.chmod(desktop_entry, 0o755)
+    os.chmod(desktop_entry, 0o744)
 
     print(f"✅ Linux desktop entry created: {desktop_entry}")
     print("🖥️  You can find the application in your applications menu")
