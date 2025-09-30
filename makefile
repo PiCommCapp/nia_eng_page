@@ -29,6 +29,8 @@ help:
 	@echo ""
 	@echo "Tray Application Commands:"
 	@echo "  make tray       - Run the tray application (requires display)"
+	@echo "  make tray-bg    - Run the tray application in background (no terminal needed)"
+	@echo "  make tray-shortcut - Create desktop shortcut for the application"
 	@echo "  make test-tray  - Test tray application components"
 	@echo "  make build-tray - Build executable for current platform"
 	@echo ""
@@ -51,6 +53,12 @@ help:
 	@echo "  make release-build - Build release packages (with tests)"
 	@echo "  make release-build-fast - Build release packages (skip tests)"
 	@echo "  make release-clean - Clean release artifacts"
+	@echo ""
+	@echo "Launcher Commands:"
+	@echo "  make tray-bg       - Launch tray app in background (no terminal needed)"
+	@echo "  make tray-shortcut - Create desktop shortcut for easy launching"
+	@echo "  ./launchers/launch-tray.sh - Unix/Linux/macOS launcher script"
+	@echo "  launchers\\launch-tray.bat - Windows launcher script"
 	@echo ""
 
 # Start the development server
@@ -215,6 +223,33 @@ tray:
 	@echo "⚠️  Note: This requires a display (X11/Wayland on Linux)"
 	@echo ""
 	uv run python tray_app/main.py
+
+# Run the tray application in background (no terminal needed)
+tray-bg:
+	@echo "🖥️  Starting NIA Engineering Portal Tray Application in background..."
+	@echo "✅ You can close this terminal window"
+	@echo ""
+	@$(MAKE) tray-bg-unix || $(MAKE) tray-bg-windows
+
+# Background launch for Unix/Linux/macOS
+tray-bg-unix:
+	@nohup uv run python tray_app/main.py > /dev/null 2>&1 &
+	@echo "✅ Tray application started in background"
+	@echo "🖥️  Look for the NIA Engineering Portal icon in your system tray"
+	@echo "🛑 To stop the application, right-click the tray icon and select 'Quit'"
+
+# Background launch for Windows
+tray-bg-windows:
+	@start /B uv run python tray_app/main.py
+	@echo "✅ Tray application started in background"
+	@echo "🖥️  Look for the NIA Engineering Portal icon in your system tray"
+	@echo "🛑 To stop the application, right-click the tray icon and select 'Quit'"
+
+# Create desktop shortcut for the application
+tray-shortcut:
+	@echo "🖥️  Creating desktop shortcut for NIA Engineering Portal..."
+	@uv run python scripts/create_desktop_shortcut.py
+	@echo "✅ Desktop shortcut created successfully!"
 
 # Test tray application components
 test-tray:

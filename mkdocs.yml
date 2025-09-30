@@ -1,0 +1,62 @@
+site_name: NIA Engineering Portal
+site_description: A lightning-fast, mission-critical engineering portal for broadcast/AV infrastructure access
+site_author: NIA Engineering Team
+site_url: https://nia-engineering-portal.github.io
+
+# Repository
+repo_name: nia-engineering-portal
+repo_url: https://github.com/nia-engineering-portal/nia-engineering-portal
+edit_uri: edit/main/docs/
+
+# Theme
+theme:
+  name: readthedocs
+
+# Plugins
+plugins:
+  - search
+
+# Markdown extensions
+markdown_extensions:
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.emoji:
+      emoji_index: !!python/name:materialx.emoji.twemoji
+      emoji_generator: !!python/name:materialx.emoji.to_svg
+  - admonition
+  - pymdownx.details
+  - tables
+  - toc:
+      permalink: true
+
+# Navigation
+nav:
+  - Home: docs/index.md
+  - Getting Started:
+      - Installation: docs/installation.md
+      - User Guide: docs/user-guide.md
+      - Troubleshooting: docs/troubleshooting.md
+  - Technical:
+      - Architecture: docs/technical.md
+      - Deployment: docs/deployment.md
+      - Testing: docs/testing.md
+      - Page Structure: docs/pages.md
+  - Project:
+      - Tasks: docs/tasks.md
+      - Context: docs/context.md
+      - Project Brief: docs/projectbrief.md
+      - Environment: docs/environment.md
+
+# Extra
+extra:
+  version:
+    provider: mike
+
+# Copyright
+copyright: Copyright &copy; 2024 NIA Engineering Team
